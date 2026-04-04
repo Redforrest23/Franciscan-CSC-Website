@@ -6,21 +6,24 @@ export default function CourseCard({
   onToggle,
   showToggle = false,
 }) {
-  const prereqNames = course.prerequisites
+  const prerequisites = course.prerequisites ?? []
+  const offered = course.typically_offered ?? course.offered ?? []
+
+  const prereqNames = prerequisites
     .map((id) => allCourses.find((c) => c.id === id)?.code ?? id)
     .join(', ')
 
-  const offeredLabel = course.offered
+  const offeredLabel = offered
     .map((t) => t.charAt(0).toUpperCase() + t.slice(1))
     .join(' / ')
 
   return (
     <div
       className={`rounded-lg border px-4 py-3 transition-all ${completed
-          ? 'border-fus-green-300 bg-fus-green-50'
-          : !prereqsMet
-            ? 'border-fus-gold-200 bg-fus-gold-50 opacity-80'
-            : 'border-gray-200 bg-white hover:border-fus-green-300'
+        ? 'border-fus-green-300 bg-fus-green-50'
+        : !prereqsMet
+          ? 'border-fus-gold-200 bg-fus-gold-50 opacity-80'
+          : 'border-gray-200 bg-white hover:border-fus-green-300'
         }`}
     >
       <div className="flex items-start justify-between gap-3">
@@ -58,7 +61,7 @@ export default function CourseCard({
           )}
 
           {/* Prereqs */}
-          {course.prerequisites.length > 0 && (
+          {prerequisites.length > 0 && (
             <p className="mt-1.5 text-xs text-gray-400">
               Prerequisites:{' '}
               <span className={prereqsMet ? 'text-fus-green-600' : 'text-fus-gold-600 font-medium'}>
