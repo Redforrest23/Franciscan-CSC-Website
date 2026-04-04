@@ -36,23 +36,46 @@ async function discoverDegrees() {
     if (!html) return []
 
     const $ = cheerio.load(html)
-    const degrees = []
+    const deptUrls = []
 
+    // Step 1 — collect all department pages (one level under /academic-programs/)
     $('a[href]').each((_, el) => {
         const href = $(el).attr('href') ?? ''
-        const text = $(el).text().trim()
         const full = href.startsWith('http')
             ? href
             : `https://franciscan.smartcatalogiq.com${href}`
-
-        // Degree pages are 2+ levels under /academic-programs/
-        const match = href.match(/\/academic-programs\/([a-z0-9\-]+)\/([a-z0-9\-]+)/)
-        if (match && href.includes('2025-2026') && text.length > 5) {
-            if (!degrees.find(d => d.url === full)) {
-                degrees.push({ url: full, name: text })
-            }
+        const match = href.match(/\/academic-programs\/([a-z0-9\-]+)$/)
+        if (match && href.includes('2025-2026')) {
+            if (!deptUrls.includes(full)) deptUrls.push(full)
         }
     })
+
+    console.log(`   Found ${deptUrls.length} department pages`)
+
+    // Step 2 — visit each department page and find individual degree links
+    const degrees = []
+    for (const deptUrl of deptUrls) {
+        const deptHtml = await fetchPage(deptUrl)
+        if (!deptHtml) continue
+
+        const $dept = cheerio.load(deptHtml)
+
+        $dept('a[href]').each((_, el) => {
+            const href = $dept(el).attr('href') ?? ''
+            const text = $dept(el).text().trim()
+            const full = href.startsWith('http')
+                ? href
+                : `https://franciscan.smartcatalogiq.com${href}`
+
+            // Degree pages are two levels under /academic-programs/
+            const match = href.match(/\/academic-programs\/([a-z0-9\-]+)\/([a-z0-9\-]+)$/)
+            if (match && href.includes('2025-2026') && text.length > 5) {
+                if (!degrees.find(d => d.url === full)) {
+                    degrees.push({ url: full, name: text })
+                }
+            }
+        })
+    }
 
     console.log(`   Found ${degrees.length} degree programs`)
     return degrees
