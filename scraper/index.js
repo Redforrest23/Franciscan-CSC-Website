@@ -26,66 +26,73 @@ async function fetchPage(url) {
     return res.text()
 }
 
-// ── Department level pages to scrape ─────────────────────
-const BASE = 'https://franciscan.smartcatalogiq.com/en/2025-2026/undergraduate-catalog-2025-2026/courses'
+// ── Catalog root — we discover ALL departments from here ──
+const CATALOG_COURSES_ROOT = 'https://franciscan.smartcatalogiq.com/en/2025-2026/undergraduate-catalog-2025-2026/courses'
 
-const DEPARTMENT_INDEXES = [
-    {
-        department: 'Computer Science',
-        levels: [
-            `${BASE}/csc-computer-science-course-descriptions/100`,
-            `${BASE}/csc-computer-science-course-descriptions/200`,
-            `${BASE}/csc-computer-science-course-descriptions/300`,
-            `${BASE}/csc-computer-science-course-descriptions/400`
-        ]
-    },
-    {
-        department: 'Software Engineering',
-        levels: [
-            `${BASE}/sfe-software-engineering-course-descriptions/100`,
-            `${BASE}/sfe-software-engineering-course-descriptions/200`,
-            `${BASE}/sfe-software-engineering-course-descriptions/300`,
-            `${BASE}/sfe-software-engineering-course-descriptions/400`
-        ]
-    },
-    {
-        department: 'Mathematics',
-        levels: [
-            `${BASE}/mth-mathematics-course-descriptions/100`,
-            `${BASE}/mth-mathematics-course-descriptions/200`,
-            `${BASE}/mth-mathematics-course-descriptions/300`,
-            `${BASE}/mth-mathematics-course-descriptions/400`
-        ]
-    },
-    {
-        department: 'Physics',
-        levels: [
-            `${BASE}/phy-physics-course-descriptions/100`,
-            `${BASE}/phy-physics-course-descriptions/200`,
-            `${BASE}/phy-physics-course-descriptions/300`,
-            `${BASE}/phy-physics-course-descriptions/400`
-        ]
-    },
-    {
-        department: 'Engineering',
-        levels: [
-            `${BASE}/egr-engineering-course-descriptions/100`,
-            `${BASE}/egr-engineering-course-descriptions/200`,
-            `${BASE}/egr-engineering-course-descriptions/300`
-        ]
-    }
-]
+// ── Discover all department index URLs from the courses root
+async function discoverDepartments() {
+    console.log('🔍 Discovering all departments...')
+    const html = await fetchPage(CATALOG_COURSES_ROOT)
+    if (!html) return []
 
-// ── Find course links on a level index page ───────────────
-function findCourseLinks($, levelUrl) {
-    const links = []
+    const $ = cheerio.load(html)
+    const departments = []
+
+    // Each department is a link under the courses section in the sidebar
     $('a[href]').each((_, el) => {
-        const href = $(el).attr('href')
-        if (!href) return
+        const href = $(el).attr('href') ?? ''
+        const text = $(el).text().trim()
+        // Department index pages are one level under /courses/ with no further path
+        const match = href.match(/\/courses\/([a-z0-9\-]+)$/)
+        if (match && href.includes('2025-2026')) {
+            const full = href.startsWith('http')
+                ? href
+                : `https://franciscan.smartcatalogiq.com${href}`
+            // Extract prefix like CSC, MTH, SFE from the text
+            const prefixMatch = text.match(/^([A-Z]{2,4})\s*[-–]/)
+            const prefix = prefixMatch ? prefixMatch[1] : match[1].split('-')[0].toUpperCase()
+            const name = text.replace(/^[A-Z]{2,4}\s*[-–]\s*/, '').replace(/\s*Course Descriptions.*$/i, '').trim()
+            if (!departments.find(d => d.url === full)) {
+                departments.push({ url: full, prefix, name })
+            }
+        }
+    })
+
+    console.log(`   Found ${departments.length} departments`)
+    return departments
+}
+
+// ── Find level subpages (100, 200, 300, 400) under a department
+async function findLevelPages(deptUrl) {
+    const html = await fetchPage(deptUrl)
+    if (!html) return []
+
+    const $ = cheerio.load(html)
+    const levels = []
+
+    $('a[href]').each((_, el) => {
+        const href = $(el).attr('href') ?? ''
         const full = href.startsWith('http')
             ? href
             : `https://franciscan.smartcatalogiq.com${href}`
-        // Only grab links that go one level deeper than the current level URL
+        // Level pages end in /100 /200 /300 /400 /500
+        if (full.startsWith(deptUrl + '/') && /\/\d00$/.test(full)) {
+            if (!levels.includes(full)) levels.push(full)
+        }
+    })
+
+    // If no level subpages found, the dept page itself lists courses
+    return levels.length > 0 ? levels : [deptUrl]
+}
+
+// ── Find individual course links on a level page ──────────
+function findCourseLinks($, levelUrl) {
+    const links = []
+    $('a[href]').each((_, el) => {
+        const href = $(el).attr('href') ?? ''
+        const full = href.startsWith('http')
+            ? href
+            : `https://franciscan.smartcatalogiq.com${href}`
         if (full.startsWith(levelUrl + '/') && full !== levelUrl) {
             if (!links.includes(full)) links.push(full)
         }
@@ -95,51 +102,73 @@ function findCourseLinks($, levelUrl) {
 
 // ── Parse a single course page ────────────────────────────
 function parseCourse($, url, department) {
-    const title = $('h1.page-title, h1').first().text().trim()
-    const codeMatch = title.match(/^([A-Z]{2,4}\s?\d{3}[A-Z]?)/)
-    const code = codeMatch ? codeMatch[1].trim() : null
+    // Title format: "CSC 142 Object-Oriented Programming Lab"
+    const h1 = $('h1').first().text().trim()
+    const codeMatch = h1.match(/^([A-Z]{2,4}\s\d{3}[A-Z]?)\s+(.+)/)
+    if (!codeMatch) return null
 
-    if (!code) return null
+    const code = codeMatch[1].trim()           // e.g. "CSC 142"
+    const id = code.replace(/\s+/g, '')        // e.g. "CSC142"
+    const title = codeMatch[2].trim()          // e.g. "Object-Oriented Programming Lab"
 
-    const id = code.replace(/\s+/g, '')
+    // Credits: under a "### Credits" heading, value is the next text node (just a number)
+    let credits = null
+    $('h3, h2, strong, b').each((_, el) => {
+        if (/^credits?$/i.test($(el).text().trim())) {
+            // Get the next sibling text
+            const next = $(el).next()
+            const val = parseInt(next.text().trim())
+            if (!isNaN(val)) credits = val
+            // Also try the text immediately after in the parent
+            if (!credits) {
+                const parentText = $(el).parent().text()
+                const m = parentText.match(/Credits?\s*[\n\r]+\s*(\d+)/)
+                if (m) credits = parseInt(m[1])
+            }
+        }
+    })
 
-    // Credits
-    const creditsText = $('*:contains("Credit")').filter((_, el) =>
-        /\d+\s+Credit/i.test($(el).text())
-    ).first().text()
-    const creditsMatch = creditsText.match(/(\d+)\s+Credit/i)
-    const credits = creditsMatch ? parseInt(creditsMatch[1]) : null
+    // Fallback: look for standalone digit near "credit" text
+    if (!credits) {
+        const bodyText = $('body').text()
+        const m = bodyText.match(/Credits?\s*\n\s*(\d+)/)
+        if (m) credits = parseInt(m[1])
+    }
 
-    // Description
-    const description = $('.desc, .course-desc, #course-description, .sc-courseitem-desc')
-        .first().text().trim()
-        || $('p').filter((_, el) => $(el).text().length > 80).first().text().trim()
+    // Description: the first substantial paragraph after h1
+    let description = null
+    $('p').each((_, el) => {
+        const text = $(el).text().trim()
+        if (!description && text.length > 60) {
+            description = text
+        }
+    })
 
     // Prerequisites
-    const prereqText = $('*:contains("Prerequisite")').filter((_, el) =>
-        /Prerequisite/i.test($(el).text()) && $(el).text().length < 300
+    const prereqText = $('*').filter((_, el) =>
+        /Prerequisite/i.test($(el).text()) && $(el).text().length < 400
     ).first().text()
     const prereqs = parseCourseCodes(prereqText)
 
     // Corequisites
-    const coreqText = $('*:contains("Corequisite")').filter((_, el) =>
-        /Corequisite/i.test($(el).text()) && $(el).text().length < 300
+    const coreqText = $('*').filter((_, el) =>
+        /Corequisite/i.test($(el).text()) && $(el).text().length < 400
     ).first().text()
     const coreqs = parseCourseCodes(coreqText)
 
     // Typically offered
-    const offeredText = $('*:contains("offered"), *:contains("Offered")').first().text().toLowerCase()
+    const bodyText = $('body').text().toLowerCase()
     const typicallyOffered = []
-    if (offeredText.includes('fall')) typicallyOffered.push('fall')
-    if (offeredText.includes('spring')) typicallyOffered.push('spring')
-    if (offeredText.includes('summer')) typicallyOffered.push('summer')
+    if (/offered.{0,30}fall|fall.{0,30}semester/i.test(bodyText)) typicallyOffered.push('fall')
+    if (/offered.{0,30}spring|spring.{0,30}semester/i.test(bodyText)) typicallyOffered.push('spring')
+    if (/offered.{0,30}summer|summer.{0,30}semester/i.test(bodyText)) typicallyOffered.push('summer')
 
     return {
         id,
         code,
-        title: title.replace(codeMatch?.[0] ?? '', '').replace(/^[\s\-–:]+/, '').trim() || title,
+        title,
         credits,
-        description: description || null,
+        description,
         prerequisites: prereqs,
         corequisites: coreqs,
         department,
@@ -149,7 +178,7 @@ function parseCourse($, url, department) {
     }
 }
 
-// ── Extract course codes from text ────────────────────────
+// ── Extract course codes like CSC144, MTH 161 ─────────────
 function parseCourseCodes(text) {
     if (!text) return []
     const matches = text.match(/[A-Z]{2,4}\s?\d{3}[A-Z]?/g) ?? []
@@ -162,39 +191,50 @@ async function main() {
     console.log(`   Delay between requests: ${DELAY_MS}ms`)
     console.log('')
 
-    const allCourses = []
+    const departments = await discoverDepartments()
+    if (!departments.length) {
+        console.error('No departments found — aborting')
+        process.exit(1)
+    }
 
-    for (const { department, levels } of DEPARTMENT_INDEXES) {
-        console.log(`📚 Department: ${department}`)
+    const allCourses = []
+    const seen = new Set()
+
+    for (const { url: deptUrl, prefix, name } of departments) {
+        console.log(`📚 ${prefix} — ${name}`)
+
+        const levels = await findLevelPages(deptUrl)
 
         for (const levelUrl of levels) {
-            console.log(`  📂 ${levelUrl}`)
             const indexHtml = await fetchPage(levelUrl)
             if (!indexHtml) continue
 
             const $ = cheerio.load(indexHtml)
             const courseLinks = findCourseLinks($, levelUrl)
-            console.log(`     Found ${courseLinks.length} course links`)
+            if (!courseLinks.length) continue
+            console.log(`   📂 ${levelUrl.split('/').pop()} — ${courseLinks.length} courses`)
 
             for (const courseUrl of courseLinks) {
-                console.log(`     → ${courseUrl}`)
+                if (seen.has(courseUrl)) continue
+                seen.add(courseUrl)
+
                 const html = await fetchPage(courseUrl)
                 if (!html) continue
 
                 const $course = cheerio.load(html)
-                const course = parseCourse($course, courseUrl, department)
+                const course = parseCourse($course, courseUrl, name)
 
                 if (course) {
-                    console.log(`       ✓ ${course.id} — ${course.title} (${course.credits} cr)`)
+                    console.log(`     ✓ ${course.id} — ${course.title} (${course.credits ?? '?'} cr)`)
                     allCourses.push(course)
                 } else {
-                    console.log(`       ✗ Could not parse`)
+                    console.log(`     ✗ ${courseUrl.split('/').pop()} — could not parse`)
                 }
             }
         }
-        console.log('')
     }
 
+    console.log('')
     console.log(`📝 Total courses parsed: ${allCourses.length}`)
     console.log('💾 Upserting to Supabase...')
 
