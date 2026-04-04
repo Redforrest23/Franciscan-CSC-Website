@@ -1,156 +1,188 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
-import { supabase } from '../lib/supabase'
-import { getCompletedSet } from '../lib/progress'
+import {
+  fetchDegrees,
+  fetchSemesterPlans,
+  fetchCourses,
+  fetchCompletedCourses,
+  courseMap,
+} from '../lib/db'
 import CourseCard from '../components/CourseCard'
-
-import degreesData from '../../data/degrees.json'
-import coursesData from '../../data/courses.json'
 
 export default function Planner() {
   const { user } = useAuth()
-  const [selectedDegreeId, setSelectedDegreeId] = useState('BS_CS')
-  const [austriaMode, setAustriaMode] = useState(false)
-  const [completedCourses, setCompletedCourses] = useState([])
 
-  const degree = degreesData.find((d) => d.id === selectedDegreeId)
-  const hasAustriaPlan = !!degree?.fourYearPlan?.austria
-  const plan = austriaMode && hasAustriaPlan
-    ? degree.fourYearPlan.austria
-    : degree?.fourYearPlan?.standard ?? []
-  const completedSet = getCompletedSet(completedCourses)
+  const [degrees, setDegrees] = useState([])
+  const [selectedDegreeId, setSelectedDegreeId] = useState(null)
+  const [plans, setPlans] = useState([])
+  const [courses, setCourses] = useState({})
+  const [completedSet, setCompletedSet] = useState(new Set())
+  const [loading, setLoading] = useState(true)
+  const [plansLoading, setPlansLoading] = useState(false)
 
+  // Load degree list
   useEffect(() => {
-    if (!user) return
-    supabase.from('completed_courses').select('*').eq('user_id', user.id)
-      .then(({ data }) => { if (data) setCompletedCourses(data) })
+    fetchDegrees().then((data) => {
+      setDegrees(data)
+      const cs = data.find((d) => d.id === 'COMPUTER_SCIENCE')
+      setSelectedDegreeId(cs?.id ?? data[0]?.id ?? null)
+      setLoading(false)
+    })
+  }, [])
+
+  // Load completed courses
+  useEffect(() => {
+    if (!user) { setCompletedSet(new Set()); return }
+    fetchCompletedCourses(user.id).then(setCompletedSet)
   }, [user])
 
+  // Load semester plans when degree changes
   useEffect(() => {
-    if (!hasAustriaPlan) setAustriaMode(false)
-  }, [selectedDegreeId, hasAustriaPlan])
+    if (!selectedDegreeId) return
+    setPlansLoading(true)
 
-  function semesterCredits(sem) {
-    const majorCr = (sem.courses || []).reduce((total, courseId) => {
-      const course = coursesData.find((c) => c.id === courseId)
-      return total + (course?.credits ?? 0)
-    }, 0)
-    const coreCr = (sem.coreSlots || []).reduce((total, slot) => {
-      return total + (slot.credits ?? 0)
-    }, 0)
-    return majorCr + coreCr
+    fetchSemesterPlans(selectedDegreeId).then(async (plans) => {
+      setPlans(plans)
+
+      const allCourseIds = [...new Set(
+        plans.flatMap((p) => p.entries.map((e) => e.course_id).filter(Boolean))
+      )]
+
+      if (allCourseIds.length) {
+        const courseList = await fetchCourses(allCourseIds)
+        setCourses(courseMap(courseList))
+      } else {
+        setCourses({})
+      }
+      setPlansLoading(false)
+    })
+  }, [selectedDegreeId])
+
+  const selectedDegree = degrees.find((d) => d.id === selectedDegreeId)
+
+  const termLabel = (semester) => semester === 1 ? 'Fall' : 'Spring'
+
+  // Group plans by year
+  const byYear = [1, 2, 3, 4].map((year) => ({
+    year,
+    semesters: plans.filter((p) => p.year === year),
+  }))
+
+  if (loading) {
+    return <div className="text-gray-400 text-sm py-12 text-center">Loading...</div>
   }
 
   return (
     <div>
-      <div className="flex items-center gap-4 mb-4 flex-wrap">
-        <h1 className="text-2xl font-bold text-gray-900">4-Year Planner</h1>
+      <div className="flex items-center gap-4 mb-6 flex-wrap">
+        <h1 className="text-2xl font-bold text-fus-green-700">4-Year Planner</h1>
         <select
-          value={selectedDegreeId}
+          value={selectedDegreeId ?? ''}
           onChange={(e) => setSelectedDegreeId(e.target.value)}
           className="ml-auto border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-fus-gold-400"
         >
-          {degreesData.map((d) => (
+          {degrees.map((d) => (
             <option key={d.id} value={d.id}>{d.name}</option>
           ))}
         </select>
       </div>
 
-      {hasAustriaPlan && (
-        <div className="flex items-center gap-3 mb-6">
-          <button
-            onClick={() => setAustriaMode(false)}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${!austriaMode
-              ? 'bg-fus-green-600 text-white'
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-          >
-            Standard Plan
-          </button>
-          <button
-            onClick={() => setAustriaMode(true)}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${austriaMode
-              ? 'bg-fus-green-600 text-white'
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-          >
-            ✈️ Austria Plan
-          </button>
+      {selectedDegree?.tier === 2 && (
+        <div className="mb-6 p-3 rounded-lg bg-fus-gold-50 border border-fus-gold-200 text-sm text-fus-gold-800">
+          This plan was auto-generated based on prerequisite ordering.
+          Semester placement may vary — always verify with your academic advisor.
         </div>
       )}
 
       <p className="text-sm text-gray-500 mb-8">
-        Recommended course sequence for <strong>{degree?.name}</strong>.
-        Your actual schedule may vary based on transfer credits, AP credit, or advisor recommendations.
-        {austriaMode && ' This plan accounts for a semester abroad in Gaming, Austria.'}
+        The recommended course sequence for the {selectedDegree?.name}.
+        Your actual schedule may vary based on transfer credits, AP credit, or advisor guidance.
       </p>
 
-      <div className="space-y-10">
-        {[1, 2, 3, 4].map((year) => {
-          const semesters = plan.filter((s) => s.year === year)
-          if (!semesters.length) return null
-          return (
-            <div key={year}>
-              <h2 className="text-lg font-bold text-gray-800 mb-4 border-b border-gray-200 pb-2">
-                Year {year}
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {semesters.map((sem) => {
-                  const credits = semesterCredits(sem)
-                  return (
-                    <div key={sem.label}>
-                      <div className="flex items-baseline justify-between mb-3">
-                        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
-                          {sem.label}
-                        </h3>
-                        <span className="text-xs font-medium text-fus-green-600 bg-fus-green-50 px-2 py-0.5 rounded-full">
-                          {credits} cr
-                        </span>
+      {plansLoading && (
+        <div className="text-gray-400 text-sm py-8 text-center">Loading plan...</div>
+      )}
+
+      {!plansLoading && plans.length === 0 && (
+        <div className="text-gray-400 text-sm py-8 text-center">
+          No semester plan available for this degree yet.
+        </div>
+      )}
+
+      {!plansLoading && byYear.map(({ year, semesters }) => (
+        semesters.length === 0 ? null : (
+          <div key={year} className="mb-10">
+            <h2 className="text-lg font-bold text-fus-green-800 mb-4 border-b border-fus-green-100 pb-2">
+              Year {year}
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {semesters.map((plan) => {
+                const semesterCredits = plan.entries.reduce((sum, e) => {
+                  if (e.course_id) return sum + (courses[e.course_id]?.credits ?? 3)
+                  return sum + (e.core_slot_credits ?? 3)
+                }, 0)
+
+                return (
+                  <div key={plan.id}>
+                    <div className="flex items-baseline justify-between mb-3">
+                      <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
+                        {termLabel(plan.semester)}
+                      </h3>
+                      <span className="text-xs text-gray-400">{semesterCredits} credits</span>
+                    </div>
+
+                    {plan.austria_semester && (
+                      <div className="mb-3 p-2.5 rounded-lg bg-fus-green-50 border border-fus-green-200 text-xs text-fus-green-700">
+                        🌍 {plan.austria_note}
                       </div>
+                    )}
 
-                      {sem.austriaSemester && (
-                        <div className="mb-3 p-3 rounded-lg bg-fus-gold-50 border border-fus-gold-300 text-sm text-fus-brown-500">
-                          ✈️ <strong>Austria Semester</strong> — {sem.austriaNote}
-                        </div>
-                      )}
-                      {!sem.austriaSemester && sem.austriaNote && (
-                        <div className="mb-3 p-3 rounded-lg bg-gray-50 border border-gray-200 text-xs text-gray-400 italic">
-                          💡 {sem.austriaNote}
-                        </div>
-                      )}
-
-                      <div className="flex flex-col gap-2">
-                        {(sem.courses || []).map((courseId) => {
-                          const course = coursesData.find((c) => c.id === courseId)
-                          if (!course) return null
+                    <div className="flex flex-col gap-2">
+                      {plan.entries.map((entry, i) => {
+                        if (entry.course_id) {
+                          const course = courses[entry.course_id]
+                          if (!course) return (
+                            <div key={i} className="text-xs text-gray-400 font-mono px-2">
+                              {entry.course_id}
+                            </div>
+                          )
                           return (
                             <CourseCard
-                              key={course.id}
+                              key={i}
                               course={course}
-                              allCourses={coursesData}
+                              allCourses={Object.values(courses)}
                               completed={completedSet.has(course.id)}
                               prereqsMet={true}
                               showToggle={false}
                             />
                           )
-                        })}
-                        {(sem.coreSlots || []).map((slot, i) => (
+                        }
+
+                        // Core slot
+                        return (
                           <div
                             key={i}
-                            className="px-4 py-3 rounded-lg border border-dashed border-gray-300 text-sm text-gray-400 italic"
+                            className="rounded-lg border border-dashed border-gray-300 bg-gray-50 px-4 py-3"
                           >
-                            {slot.label}
+                            <p className="text-xs text-gray-500 italic">
+                              {entry.core_slot_label}
+                            </p>
+                            {entry.core_slot_credits && (
+                              <p className="text-xs text-gray-400 mt-0.5">
+                                {entry.core_slot_credits} cr
+                              </p>
+                            )}
                           </div>
-                        ))}
-                      </div>
+                        )
+                      })}
                     </div>
-                  )
-                })}
-              </div>
+                  </div>
+                )
+              })}
             </div>
-          )
-        })}
-      </div>
+          </div>
+        )
+      ))}
     </div>
   )
 }
