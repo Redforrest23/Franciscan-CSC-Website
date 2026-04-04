@@ -270,7 +270,19 @@ async function autoSequence(degreeId, requirementGroups) {
 
 // ── Save degree to Supabase ───────────────────────────────
 async function saveDegree(degree, semesterPlans) {
-    // Upsert degree
+    // Check if a higher-tier version already exists — if so, skip entirely
+    const { data: existing } = await supabase
+        .from('degrees')
+        .select('tier')
+        .eq('id', degree.id)
+        .single()
+
+    if (existing && existing.tier < degree.tier) {
+        console.log(`  ⏭ Skipping ${degree.name} — existing Tier ${existing.tier} outranks incoming Tier ${degree.tier}`)
+        return
+    }
+
+    // Upsert degree row
     const { error: degreeError } = await supabase
         .from('degrees')
         .upsert({
@@ -289,7 +301,7 @@ async function saveDegree(degree, semesterPlans) {
         return
     }
 
-    // Delete existing requirement groups and plans for clean upsert
+    // Delete existing child data and reinsert fresh
     await supabase.from('degree_requirement_groups').delete().eq('degree_id', degree.id)
     await supabase.from('degree_semester_plans').delete().eq('degree_id', degree.id)
 
@@ -366,6 +378,7 @@ async function main() {
 
     let saved = 0
     let skipped = 0
+    let protected_ = 0
 
     for (const { url, name } of degreeUrls) {
         console.log(`📋 ${name}`)
@@ -382,13 +395,26 @@ async function main() {
             continue
         }
 
+        // Check tier before sequencing to avoid unnecessary Supabase calls
+        const { data: existing } = await supabase
+            .from('degrees')
+            .select('tier')
+            .eq('id', degree.id)
+            .single()
+
+        if (existing && existing.tier < 2) {
+            console.log(`  ⏭ Skipping ${degree.name} — Tier ${existing.tier} protected`)
+            protected_++
+            continue
+        }
+
         const semesterPlans = await autoSequence(degree.id, degree.requirementGroups)
         await saveDegree(degree, semesterPlans)
         saved++
     }
 
     console.log('')
-    console.log(`📝 Degrees saved: ${saved} — Skipped: ${skipped}`)
+    console.log(`📝 Degrees saved: ${saved} — Skipped: ${skipped} — Protected (higher tier): ${protected_}`)
     console.log('✅ Degree scrape complete!')
 }
 
