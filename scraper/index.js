@@ -102,73 +102,65 @@ function findCourseLinks($, levelUrl) {
 
 // ── Parse a single course page ────────────────────────────
 function parseCourse($, url, department) {
-    // Title format: "CSC 142 Object-Oriented Programming Lab"
     const h1 = $('h1').first().text().trim()
+    const allH1s = $('h1').map((_, el) => $(el).text().trim()).get()
+
+    console.log(`       [DEBUG] h1 text: "${h1}"`)
+    console.log(`       [DEBUG] all h1s: ${JSON.stringify(allH1s)}`)
+
     const codeMatch = h1.match(/^([A-Z]{2,4}\s\d{3}[A-Z]?)\s+(.+)/)
-    if (!codeMatch) return null
+    if (!codeMatch) {
+        // Try alternate format — some pages may have code and title split
+        const altMatch = h1.match(/^([A-Z]{2,4}\s?\d{3}[A-Z]?)$/)
+        console.log(`       [DEBUG] altMatch: ${JSON.stringify(altMatch)}`)
+        return null
+    }
 
-    const code = codeMatch[1].trim()           // e.g. "CSC 142"
-    const id = code.replace(/\s+/g, '')        // e.g. "CSC142"
-    const title = codeMatch[2].trim()          // e.g. "Object-Oriented Programming Lab"
+    const code = codeMatch[1].trim()
+    const id = code.replace(/\s+/g, '')
+    const title = codeMatch[2].trim()
 
-    // Credits: under a "### Credits" heading, value is the next text node (just a number)
+    // Credits
     let credits = null
+    const bodyText = $('body').text()
+    console.log(`       [DEBUG] body snippet: "${bodyText.slice(0, 300).replace(/\n/g, '|')}"`)
+
     $('h3, h2, strong, b').each((_, el) => {
         if (/^credits?$/i.test($(el).text().trim())) {
-            // Get the next sibling text
             const next = $(el).next()
             const val = parseInt(next.text().trim())
             if (!isNaN(val)) credits = val
-            // Also try the text immediately after in the parent
-            if (!credits) {
-                const parentText = $(el).parent().text()
-                const m = parentText.match(/Credits?\s*[\n\r]+\s*(\d+)/)
-                if (m) credits = parseInt(m[1])
-            }
         }
     })
 
-    // Fallback: look for standalone digit near "credit" text
     if (!credits) {
-        const bodyText = $('body').text()
         const m = bodyText.match(/Credits?\s*\n\s*(\d+)/)
         if (m) credits = parseInt(m[1])
     }
 
-    // Description: the first substantial paragraph after h1
-    let description = null
-    $('p').each((_, el) => {
-        const text = $(el).text().trim()
-        if (!description && text.length > 60) {
-            description = text
-        }
-    })
-
-    // Prerequisites
     const prereqText = $('*').filter((_, el) =>
         /Prerequisite/i.test($(el).text()) && $(el).text().length < 400
     ).first().text()
     const prereqs = parseCourseCodes(prereqText)
 
-    // Corequisites
     const coreqText = $('*').filter((_, el) =>
         /Corequisite/i.test($(el).text()) && $(el).text().length < 400
     ).first().text()
     const coreqs = parseCourseCodes(coreqText)
 
-    // Typically offered
-    const bodyText = $('body').text().toLowerCase()
+    let description = null
+    $('p').each((_, el) => {
+        const text = $(el).text().trim()
+        if (!description && text.length > 60) description = text
+    })
+
     const typicallyOffered = []
     if (/offered.{0,30}fall|fall.{0,30}semester/i.test(bodyText)) typicallyOffered.push('fall')
     if (/offered.{0,30}spring|spring.{0,30}semester/i.test(bodyText)) typicallyOffered.push('spring')
     if (/offered.{0,30}summer|summer.{0,30}semester/i.test(bodyText)) typicallyOffered.push('summer')
 
     return {
-        id,
-        code,
-        title,
-        credits,
-        description,
+        id, code, title, credits, description,
         prerequisites: prereqs,
         corequisites: coreqs,
         department,
@@ -200,7 +192,7 @@ async function main() {
     const allCourses = []
     const seen = new Set()
 
-    for (const { url: deptUrl, prefix, name } of departments) {
+    for (const { url: deptUrl, prefix, name } of departments.slice(0, 2)) {
         console.log(`📚 ${prefix} — ${name}`)
 
         const levels = await findLevelPages(deptUrl)
