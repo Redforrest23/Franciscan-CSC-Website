@@ -10,7 +10,7 @@ const supabase = createClient(
 
 // ── Polite scraper config ─────────────────────────────────
 const DELAY_MS = 2500
-const USER_AGENT = 'FUS-Planner-Bot/1.0 (student academic planner tool; contact: your@email.com)'
+const USER_AGENT = 'FUS-Planner-Bot/1.0 (student academic planner tool)'
 
 const delay = (ms) => new Promise((res) => setTimeout(res, ms))
 
@@ -26,10 +26,10 @@ async function fetchPage(url) {
     return res.text()
 }
 
-// ── Catalog root — we discover ALL departments from here ──
+// ── Catalog root ──────────────────────────────────────────
 const CATALOG_COURSES_ROOT = 'https://franciscan.smartcatalogiq.com/en/2025-2026/undergraduate-catalog-2025-2026/courses'
 
-// ── Discover all department index URLs from the courses root
+// ── Discover all departments from the courses root page ───
 async function discoverDepartments() {
     console.log('🔍 Discovering all departments...')
     const html = await fetchPage(CATALOG_COURSES_ROOT)
@@ -38,17 +38,14 @@ async function discoverDepartments() {
     const $ = cheerio.load(html)
     const departments = []
 
-    // Each department is a link under the courses section in the sidebar
     $('a[href]').each((_, el) => {
         const href = $(el).attr('href') ?? ''
         const text = $(el).text().trim()
-        // Department index pages are one level under /courses/ with no further path
         const match = href.match(/\/courses\/([a-z0-9\-]+)$/)
         if (match && href.includes('2025-2026')) {
             const full = href.startsWith('http')
                 ? href
                 : `https://franciscan.smartcatalogiq.com${href}`
-            // Extract prefix like CSC, MTH, SFE from the text
             const prefixMatch = text.match(/^([A-Z]{2,4})\s*[-–]/)
             const prefix = prefixMatch ? prefixMatch[1] : match[1].split('-')[0].toUpperCase()
             const name = text.replace(/^[A-Z]{2,4}\s*[-–]\s*/, '').replace(/\s*Course Descriptions.*$/i, '').trim()
@@ -62,7 +59,7 @@ async function discoverDepartments() {
     return departments
 }
 
-// ── Find level subpages (100, 200, 300, 400) under a department
+// ── Find level subpages (100, 200, 300, 400) ─────────────
 async function findLevelPages(deptUrl) {
     const html = await fetchPage(deptUrl)
     if (!html) return []
@@ -75,13 +72,11 @@ async function findLevelPages(deptUrl) {
         const full = href.startsWith('http')
             ? href
             : `https://franciscan.smartcatalogiq.com${href}`
-        // Level pages end in /100 /200 /300 /400 /500
         if (full.startsWith(deptUrl + '/') && /\/\d00$/.test(full)) {
             if (!levels.includes(full)) levels.push(full)
         }
     })
 
-    // If no level subpages found, the dept page itself lists courses
     return levels.length > 0 ? levels : [deptUrl]
 }
 
@@ -102,42 +97,38 @@ function findCourseLinks($, levelUrl) {
 
 // ── Parse a single course page ────────────────────────────
 function parseCourse($, url, department) {
-    const h1 = $('h1').first().text().trim()
+    // Two h1s on every page — first is the university name, second is the course
     const allH1s = $('h1').map((_, el) => $(el).text().trim()).get()
-
-    console.log(`       [DEBUG] h1 text: "${h1}"`)
-    console.log(`       [DEBUG] all h1s: ${JSON.stringify(allH1s)}`)
+    const h1 = allH1s.find(t => /^[A-Z]{2,4}\s\d{3}/.test(t)) ?? ''
 
     const codeMatch = h1.match(/^([A-Z]{2,4}\s\d{3}[A-Z]?)\s+(.+)/)
-    if (!codeMatch) {
-        // Try alternate format — some pages may have code and title split
-        const altMatch = h1.match(/^([A-Z]{2,4}\s?\d{3}[A-Z]?)$/)
-        console.log(`       [DEBUG] altMatch: ${JSON.stringify(altMatch)}`)
-        return null
-    }
+    if (!codeMatch) return null
 
     const code = codeMatch[1].trim()
     const id = code.replace(/\s+/g, '')
     const title = codeMatch[2].trim()
 
-    // Credits
+    // Credits — appears as a number on its own line under a "Credits" heading
     let credits = null
-    const bodyText = $('body').text()
-    console.log(`       [DEBUG] body snippet: "${bodyText.slice(0, 300).replace(/\n/g, '|')}"`)
-
     $('h3, h2, strong, b').each((_, el) => {
         if (/^credits?$/i.test($(el).text().trim())) {
-            const next = $(el).next()
-            const val = parseInt(next.text().trim())
+            const val = parseInt($(el).next().text().trim())
             if (!isNaN(val)) credits = val
         }
     })
-
     if (!credits) {
-        const m = bodyText.match(/Credits?\s*\n\s*(\d+)/)
+        const m = $('body').text().match(/Credits?\s*\n\s*(\d+)/)
         if (m) credits = parseInt(m[1])
     }
 
+    // Description — first substantial paragraph
+    let description = null
+    $('p').each((_, el) => {
+        const text = $(el).text().trim()
+        if (!description && text.length > 60) description = text
+    })
+
+    // Prerequisites and corequisites
     const prereqText = $('*').filter((_, el) =>
         /Prerequisite/i.test($(el).text()) && $(el).text().length < 400
     ).first().text()
@@ -148,12 +139,8 @@ function parseCourse($, url, department) {
     ).first().text()
     const coreqs = parseCourseCodes(coreqText)
 
-    let description = null
-    $('p').each((_, el) => {
-        const text = $(el).text().trim()
-        if (!description && text.length > 60) description = text
-    })
-
+    // Typically offered
+    const bodyText = $('body').text()
     const typicallyOffered = []
     if (/offered.{0,30}fall|fall.{0,30}semester/i.test(bodyText)) typicallyOffered.push('fall')
     if (/offered.{0,30}spring|spring.{0,30}semester/i.test(bodyText)) typicallyOffered.push('spring')
@@ -170,7 +157,7 @@ function parseCourse($, url, department) {
     }
 }
 
-// ── Extract course codes like CSC144, MTH 161 ─────────────
+// ── Extract course codes from text ────────────────────────
 function parseCourseCodes(text) {
     if (!text) return []
     const matches = text.match(/[A-Z]{2,4}\s?\d{3}[A-Z]?/g) ?? []
@@ -192,7 +179,7 @@ async function main() {
     const allCourses = []
     const seen = new Set()
 
-    for (const { url: deptUrl, prefix, name } of departments.slice(0, 2)) {
+    for (const { url: deptUrl, prefix, name } of departments) {
         console.log(`📚 ${prefix} — ${name}`)
 
         const levels = await findLevelPages(deptUrl)
