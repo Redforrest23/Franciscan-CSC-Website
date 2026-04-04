@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+    --fus-green: #3a7d2e;
+    --fus-green-dark: #2d6122;
+    --fus-gold: #e5aa1e;
+    --fus-gold-dark: #c48f0e;
+    --fus-brown: #8f5e2f;
+    --fus-cream: #fdfaf5;
+    --fus-white: #ffffff;
+}
+
+body {
+    background-color: var(--fus-cream);
+    color: #1a1a1a;
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f0f0f0;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c9aa8d;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--fus-brown);
+}
+
+input[type="checkbox"] {
+    accent-color: var(--fus-green);
+}
+
+*:focus-visible {
+    outline: 2px solid var(--fus-gold);
+    outline-offset: 2px;
+}

@@ -1,0 +1,1471 @@
+[
+  {
+    "id": "BS_CS",
+    "name": "Computer Science",
+    "degree": "Bachelor of Science",
+    "totalCredits": 120,
+    "description": "A rigorous program grounded in the Catholic intellectual tradition, preparing students for careers in software, AI, cybersecurity, and more.",
+    "catalogUrl": "https://franciscan.smartcatalogiq.com/en/2025-2026/undergraduate-catalog-2025-2026/academic-programs/computer-science/computer-science-bachelor-of-science",
+    "requirementGroups": [
+      {
+        "id": "cs_core",
+        "label": "CS Core",
+        "courses": [
+          "CSC142",
+          "CSC144",
+          "CSC145",
+          "CSC204",
+          "CSC261",
+          "CSC265",
+          "CSC276",
+          "CSC310",
+          "CSC335",
+          "CSC344",
+          "CSC401",
+          "CSC438",
+          "CSC439"
+        ]
+      },
+      {
+        "id": "web_dev",
+        "label": "Web Development (choose one)",
+        "chooseOne": true,
+        "courses": [
+          "CSC391",
+          "CSC392"
+        ]
+      },
+      {
+        "id": "cs_electives",
+        "label": "CSC/SFE Electives (2 required)",
+        "elective": true,
+        "count": 2,
+        "courses": []
+      },
+      {
+        "id": "sfe_required",
+        "label": "Required SFE Courses",
+        "courses": [
+          "SFE128",
+          "SFE240",
+          "SFE305"
+        ]
+      },
+      {
+        "id": "math",
+        "label": "Mathematics",
+        "courses": [
+          "MTH161",
+          "MTH171",
+          "MTH172",
+          "MTH220",
+          "MTH320"
+        ]
+      },
+      {
+        "id": "stats",
+        "label": "Statistics Elective (choose one)",
+        "chooseOne": true,
+        "courses": [
+          "ECO212",
+          "MTH204",
+          "MTH401"
+        ]
+      },
+      {
+        "id": "science",
+        "label": "Natural Science Core with Lab (2 sequences)",
+        "elective": true,
+        "count": 2,
+        "courses": [
+          "SCI147"
+        ]
+      },
+      {
+        "id": "ethics",
+        "label": "Ethics",
+        "courses": [
+          "PHL212"
+        ]
+      }
+    ],
+    "fourYearPlan": {
+      "standard": [
+        {
+          "year": 1,
+          "semester": 1,
+          "label": "Freshman Fall",
+          "courses": [
+            "CSC142",
+            "CSC144",
+            "PHL212",
+            "MTH161",
+            "MTH171",
+            "SCI147"
+          ],
+          "coreSlots": [
+            {
+              "label": "American Founding Principles Core",
+              "credits": 3
+            }
+          ]
+        },
+        {
+          "year": 1,
+          "semester": 2,
+          "label": "Freshman Spring",
+          "courses": [
+            "CSC145",
+            "MTH172",
+            "SFE128"
+          ],
+          "coreSlots": [
+            {
+              "label": "Statistics Elective",
+              "credits": 3
+            },
+            {
+              "label": "Economics Core",
+              "credits": 3
+            },
+            {
+              "label": "Philosophy Core",
+              "credits": 3
+            }
+          ]
+        },
+        {
+          "year": 2,
+          "semester": 1,
+          "label": "Sophomore Fall",
+          "courses": [
+            "CSC261",
+            "CSC276",
+            "MTH220",
+            "SFE240"
+          ],
+          "coreSlots": [
+            {
+              "label": "Natural Science Core",
+              "credits": 3
+            },
+            {
+              "label": "Natural Science Lab",
+              "credits": 1
+            }
+          ]
+        },
+        {
+          "year": 2,
+          "semester": 2,
+          "label": "Sophomore Spring",
+          "courses": [
+            "CSC204",
+            "CSC265",
+            "MTH320"
+          ],
+          "coreSlots": [
+            {
+              "label": "Natural Science Core",
+              "credits": 3
+            },
+            {
+              "label": "Natural Science Lab",
+              "credits": 1
+            },
+            {
+              "label": "Elective",
+              "credits": 3
+            }
+          ]
+        },
+        {
+          "year": 3,
+          "semester": 1,
+          "label": "Junior Fall",
+          "austriaNote": "The fifth semester is best suited for a semester abroad in Gaming, Austria. This would normally consist of CSC 401 (online) + 4 Core courses.",
+          "courses": [
+            "CSC344"
+          ],
+          "coreSlots": [
+            {
+              "label": "History Core",
+              "credits": 3
+            },
+            {
+              "label": "Literature Core",
+              "credits": 3
+            },
+            {
+              "label": "Philosophy Core",
+              "credits": 3
+            },
+            {
+              "label": "Theology Core",
+              "credits": 3
+            }
+          ]
+        },
+        {
+          "year": 3,
+          "semester": 2,
+          "label": "Junior Spring",
+          "courses": [
+            "CSC310",
+            "CSC335",
+            "SFE305"
+          ],
+          "coreSlots": [
+            {
+              "label": "CSC/SFE Elective",
+              "credits": 3
+            },
+            {
+              "label": "Web Dev Elective (CSC 391 or 392)",
+              "credits": 3
+            },
+            {
+              "label": "Catholic Traditions in Fine Arts Core",
+              "credits": 3
+            }
+          ]
+        },
+        {
+          "year": 4,
+          "semester": 1,
+          "label": "Senior Fall",
+          "courses": [
+            "CSC401",
+            "CSC438"
+          ],
+          "coreSlots": [
+            {
+              "label": "CSC/SFE Elective",
+              "credits": 3
+            },
+            {
+              "label": "Social Science Core",
+              "credits": 3
+            },
+            {
+              "label": "Elective",
+              "credits": 3
+            }
+          ]
+        },
+        {
+          "year": 4,
+          "semester": 2,
+          "label": "Senior Spring",
+          "courses": [
+            "CSC439"
+          ],
+          "coreSlots": [
+            {
+              "label": "Theology OR Philosophy Core",
+              "credits": 3
+            },
+            {
+              "label": "Elective",
+              "credits": 3
+            },
+            {
+              "label": "Elective",
+              "credits": 3
+            },
+            {
+              "label": "Elective",
+              "credits": 3
+            }
+          ]
+        }
+      ],
+      "austria": [
+        {
+          "year": 1,
+          "semester": 1,
+          "label": "Freshman Fall",
+          "courses": [
+            "CSC142",
+            "CSC144",
+            "PHL212",
+            "MTH161",
+            "MTH171",
+            "SCI147"
+          ],
+          "coreSlots": [
+            {
+              "label": "American Founding Principles Core",
+              "credits": 3
+            }
+          ]
+        },
+        {
+          "year": 1,
+          "semester": 2,
+          "label": "Freshman Spring",
+          "courses": [
+            "CSC145",
+            "MTH172",
+            "SFE128"
+          ],
+          "coreSlots": [
+            {
+              "label": "Statistics Elective",
+              "credits": 3
+            },
+            {
+              "label": "Economics Core",
+              "credits": 3
+            },
+            {
+              "label": "Philosophy Core",
+              "credits": 3
+            }
+          ]
+        },
+        {
+          "year": 2,
+          "semester": 1,
+          "label": "Sophomore Fall",
+          "courses": [
+            "CSC261",
+            "CSC276",
+            "MTH220",
+            "SFE240"
+          ],
+          "coreSlots": [
+            {
+              "label": "Natural Science Core",
+              "credits": 3
+            },
+            {
+              "label": "Natural Science Lab",
+              "credits": 1
+            }
+          ]
+        },
+        {
+          "year": 2,
+          "semester": 2,
+          "label": "Sophomore Spring",
+          "courses": [
+            "CSC204",
+            "CSC265",
+            "MTH320"
+          ],
+          "coreSlots": [
+            {
+              "label": "Natural Science Core",
+              "credits": 3
+            },
+            {
+              "label": "Natural Science Lab",
+              "credits": 1
+            },
+            {
+              "label": "Elective",
+              "credits": 3
+            }
+          ]
+        },
+        {
+          "year": 3,
+          "semester": 1,
+          "label": "Junior Fall — AUSTRIA SEMESTER",
+          "austriaSemester": true,
+          "austriaNote": "Spend this semester at the Gaming, Austria campus. Take CSC 401 online + 4 Core courses on-site. Requires pre-planning with an academic advisor.",
+          "courses": [
+            "CSC401"
+          ],
+          "coreSlots": [
+            {
+              "label": "History Core",
+              "credits": 3
+            },
+            {
+              "label": "Literature Core",
+              "credits": 3
+            },
+            {
+              "label": "Philosophy Core",
+              "credits": 3
+            },
+            {
+              "label": "Theology Core",
+              "credits": 3
+            }
+          ]
+        },
+        {
+          "year": 3,
+          "semester": 2,
+          "label": "Junior Spring",
+          "courses": [
+            "CSC310",
+            "CSC335",
+            "CSC344",
+            "SFE305"
+          ],
+          "coreSlots": [
+            {
+              "label": "Web Dev Elective (CSC 391 or 392)",
+              "credits": 3
+            },
+            {
+              "label": "Catholic Traditions in Fine Arts Core",
+              "credits": 3
+            }
+          ]
+        },
+        {
+          "year": 4,
+          "semester": 1,
+          "label": "Senior Fall",
+          "courses": [
+            "CSC438"
+          ],
+          "coreSlots": [
+            {
+              "label": "CSC/SFE Elective",
+              "credits": 3
+            },
+            {
+              "label": "CSC/SFE Elective",
+              "credits": 3
+            },
+            {
+              "label": "Social Science Core",
+              "credits": 3
+            },
+            {
+              "label": "Elective",
+              "credits": 3
+            }
+          ]
+        },
+        {
+          "year": 4,
+          "semester": 2,
+          "label": "Senior Spring",
+          "courses": [
+            "CSC439"
+          ],
+          "coreSlots": [
+            {
+              "label": "Theology OR Philosophy Core",
+              "credits": 3
+            },
+            {
+              "label": "Elective",
+              "credits": 3
+            },
+            {
+              "label": "Elective",
+              "credits": 3
+            },
+            {
+              "label": "Elective",
+              "credits": 3
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "BS_CS_CYBERSEC",
+    "name": "Computer Science — Cybersecurity Concentration",
+    "degree": "Bachelor of Science",
+    "totalCredits": 120,
+    "description": "The CS degree with a focused cybersecurity concentration covering computer security, network security, and secure software development.",
+    "catalogUrl": "https://franciscan.smartcatalogiq.com/2025-2026/undergraduate-catalog-2025-2026/academic-programs/computer-science/computer-science-cybersecurity-bachelor-of-science",
+    "requirementGroups": [
+      {
+        "id": "cs_core",
+        "label": "CS Core",
+        "courses": [
+          "CSC142",
+          "CSC144",
+          "CSC145",
+          "CSC204",
+          "CSC261",
+          "CSC276",
+          "CSC310",
+          "CSC335",
+          "CSC344",
+          "CSC401",
+          "CSC438",
+          "CSC439"
+        ]
+      },
+      {
+        "id": "cybersec_core",
+        "label": "Cybersecurity Concentration",
+        "courses": [
+          "SFE364",
+          "SFE365",
+          "SFE366",
+          "CSC330"
+        ]
+      },
+      {
+        "id": "web_dev",
+        "label": "Web Development (choose one)",
+        "chooseOne": true,
+        "courses": [
+          "CSC391",
+          "CSC392"
+        ]
+      },
+      {
+        "id": "sfe_required",
+        "label": "Required SFE Courses",
+        "courses": [
+          "SFE128",
+          "SFE240",
+          "SFE305"
+        ]
+      },
+      {
+        "id": "math",
+        "label": "Mathematics",
+        "courses": [
+          "MTH161",
+          "MTH171",
+          "MTH172",
+          "MTH220",
+          "MTH320"
+        ]
+      },
+      {
+        "id": "stats",
+        "label": "Statistics Elective (choose one)",
+        "chooseOne": true,
+        "courses": [
+          "ECO212",
+          "MTH204",
+          "MTH401"
+        ]
+      },
+      {
+        "id": "science",
+        "label": "Natural Science Core with Lab",
+        "courses": [
+          "SCI147"
+        ]
+      },
+      {
+        "id": "ethics",
+        "label": "Ethics",
+        "courses": [
+          "PHL212"
+        ]
+      }
+    ],
+    "fourYearPlan": {
+      "standard": [
+        {
+          "year": 1,
+          "semester": 1,
+          "label": "Freshman Fall",
+          "courses": [
+            "CSC142",
+            "CSC144",
+            "PHL212",
+            "MTH161",
+            "MTH171",
+            "SCI147"
+          ],
+          "coreSlots": [
+            {
+              "label": "American Founding Principles Core",
+              "credits": 3
+            }
+          ]
+        },
+        {
+          "year": 1,
+          "semester": 2,
+          "label": "Freshman Spring",
+          "courses": [
+            "CSC145",
+            "MTH172",
+            "SFE128"
+          ],
+          "coreSlots": [
+            {
+              "label": "Statistics Elective",
+              "credits": 3
+            },
+            {
+              "label": "Economics Core",
+              "credits": 3
+            },
+            {
+              "label": "Philosophy Core",
+              "credits": 3
+            }
+          ]
+        },
+        {
+          "year": 2,
+          "semester": 1,
+          "label": "Sophomore Fall",
+          "courses": [
+            "CSC261",
+            "CSC276",
+            "MTH220",
+            "SFE240"
+          ],
+          "coreSlots": [
+            {
+              "label": "Natural Science Core",
+              "credits": 3
+            },
+            {
+              "label": "Natural Science Lab",
+              "credits": 1
+            }
+          ]
+        },
+        {
+          "year": 2,
+          "semester": 2,
+          "label": "Sophomore Spring",
+          "courses": [
+            "CSC204",
+            "CSC265",
+            "MTH320"
+          ],
+          "coreSlots": [
+            {
+              "label": "Natural Science Core",
+              "credits": 3
+            },
+            {
+              "label": "Natural Science Lab",
+              "credits": 1
+            },
+            {
+              "label": "Elective",
+              "credits": 3
+            }
+          ]
+        },
+        {
+          "year": 3,
+          "semester": 1,
+          "label": "Junior Fall",
+          "austriaNote": "The fifth semester is best suited for a semester abroad in Gaming, Austria.",
+          "courses": [
+            "CSC344",
+            "CSC330"
+          ],
+          "coreSlots": [
+            {
+              "label": "History Core",
+              "credits": 3
+            },
+            {
+              "label": "Literature Core",
+              "credits": 3
+            },
+            {
+              "label": "Theology Core",
+              "credits": 3
+            }
+          ]
+        },
+        {
+          "year": 3,
+          "semester": 2,
+          "label": "Junior Spring",
+          "courses": [
+            "CSC310",
+            "CSC335",
+            "SFE305",
+            "SFE364"
+          ],
+          "coreSlots": [
+            {
+              "label": "Web Dev Elective (CSC 391 or 392)",
+              "credits": 3
+            },
+            {
+              "label": "Catholic Traditions in Fine Arts Core",
+              "credits": 3
+            }
+          ]
+        },
+        {
+          "year": 4,
+          "semester": 1,
+          "label": "Senior Fall",
+          "courses": [
+            "CSC401",
+            "CSC438",
+            "SFE366"
+          ],
+          "coreSlots": [
+            {
+              "label": "Social Science Core",
+              "credits": 3
+            },
+            {
+              "label": "Elective",
+              "credits": 3
+            }
+          ]
+        },
+        {
+          "year": 4,
+          "semester": 2,
+          "label": "Senior Spring",
+          "courses": [
+            "CSC439",
+            "SFE365"
+          ],
+          "coreSlots": [
+            {
+              "label": "Theology OR Philosophy Core",
+              "credits": 3
+            },
+            {
+              "label": "Elective",
+              "credits": 3
+            },
+            {
+              "label": "Elective",
+              "credits": 3
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "BS_SFE",
+    "name": "Software Engineering",
+    "degree": "Bachelor of Science",
+    "totalCredits": 128,
+    "description": "A rigorous engineering program preparing students for professional software development with a strong mathematical and ethical foundation.",
+    "catalogUrl": "https://franciscan.smartcatalogiq.com/2025-2026/undergraduate-catalog-2025-2026/academic-programs/engineering/software-engineering",
+    "requirementGroups": [
+      {
+        "id": "sfe_core",
+        "label": "SFE Core",
+        "courses": [
+          "SFE112",
+          "SFE128",
+          "SFE204",
+          "SFE224",
+          "SFE240",
+          "SFE261",
+          "SFE305",
+          "SFE340",
+          "SFE384",
+          "SFE385",
+          "SFE401",
+          "SFE438",
+          "SFE439"
+        ]
+      },
+      {
+        "id": "cs_required",
+        "label": "Required CS Courses",
+        "courses": [
+          "CSC142",
+          "CSC144",
+          "CSC145"
+        ]
+      },
+      {
+        "id": "sfe_electives",
+        "label": "SFE/CSC Upper Level Electives (2 required)",
+        "elective": true,
+        "count": 2,
+        "courses": []
+      },
+      {
+        "id": "cybersec_elective",
+        "label": "Cybersecurity Elective (choose one)",
+        "chooseOne": true,
+        "courses": [
+          "CSC330",
+          "SFE364",
+          "SFE366",
+          "SFE471"
+        ]
+      },
+      {
+        "id": "engineering",
+        "label": "Engineering",
+        "courses": [
+          "EGR102",
+          "EGR160",
+          "EGR230"
+        ]
+      },
+      {
+        "id": "math",
+        "label": "Mathematics",
+        "courses": [
+          "MTH161",
+          "MTH162",
+          "MTH171",
+          "MTH172",
+          "MTH220",
+          "MTH333"
+        ]
+      },
+      {
+        "id": "stats",
+        "label": "Probability & Statistics Elective (choose one)",
+        "chooseOne": true,
+        "courses": [
+          "MTH204",
+          "MTH401",
+          "ECO212"
+        ]
+      },
+      {
+        "id": "math_sci_elective",
+        "label": "Math/Science Elective (advisor approval)",
+        "elective": true,
+        "count": 1,
+        "courses": []
+      },
+      {
+        "id": "physics",
+        "label": "Physics",
+        "courses": [
+          "PHY220",
+          "PHY221",
+          "PHY224",
+          "PHY225"
+        ]
+      },
+      {
+        "id": "sci_series",
+        "label": "Catholicism, Science & Technology Series",
+        "courses": [
+          "SCI147",
+          "SCI247",
+          "SCI347",
+          "SCI447"
+        ]
+      },
+      {
+        "id": "ethics",
+        "label": "Ethics",
+        "courses": [
+          "PHL212"
+        ]
+      }
+    ],
+    "fourYearPlan": {
+      "standard": [
+        {
+          "year": 1,
+          "semester": 1,
+          "label": "Freshman Fall",
+          "courses": [
+            "SFE112",
+            "CSC142",
+            "CSC144",
+            "EGR102",
+            "MTH161",
+            "MTH171",
+            "PHL212",
+            "SCI147"
+          ],
+          "coreSlots": []
+        },
+        {
+          "year": 1,
+          "semester": 2,
+          "label": "Freshman Spring",
+          "courses": [
+            "EGR160",
+            "MTH162",
+            "MTH172",
+            "PHY220",
+            "SFE128"
+          ],
+          "coreSlots": [
+            {
+              "label": "Theology Core",
+              "credits": 3
+            }
+          ]
+        },
+        {
+          "year": 2,
+          "semester": 1,
+          "label": "Sophomore Fall",
+          "courses": [
+            "SFE224",
+            "SFE240",
+            "SFE261",
+            "MTH220",
+            "PHY221",
+            "SCI247"
+          ],
+          "coreSlots": [
+            {
+              "label": "Social Science Core",
+              "credits": 3
+            }
+          ]
+        },
+        {
+          "year": 2,
+          "semester": 2,
+          "label": "Sophomore Spring",
+          "courses": [
+            "SFE204",
+            "CSC145",
+            "MTH333",
+            "PHY224",
+            "PHY225"
+          ],
+          "coreSlots": [
+            {
+              "label": "Philosophy Core",
+              "credits": 3
+            }
+          ]
+        },
+        {
+          "year": 3,
+          "semester": 1,
+          "label": "Junior Fall",
+          "austriaNote": "The fifth semester is best suited for a semester abroad in Gaming, Austria. Take SFE/CSC 401 online + 4 Core courses on-site.",
+          "courses": [
+            "EGR230",
+            "SCI347",
+            "SFE340",
+            "SFE401"
+          ],
+          "coreSlots": [
+            {
+              "label": "Math/Science Elective",
+              "credits": 3
+            },
+            {
+              "label": "Economics Core",
+              "credits": 3
+            }
+          ]
+        },
+        {
+          "year": 3,
+          "semester": 2,
+          "label": "Junior Spring",
+          "courses": [
+            "SFE305",
+            "SFE384",
+            "SFE385"
+          ],
+          "coreSlots": [
+            {
+              "label": "Cybersecurity Elective",
+              "credits": 3
+            },
+            {
+              "label": "American Founding Principles Core",
+              "credits": 3
+            },
+            {
+              "label": "Theology Core",
+              "credits": 3
+            }
+          ]
+        },
+        {
+          "year": 4,
+          "semester": 1,
+          "label": "Senior Fall",
+          "courses": [
+            "SCI447",
+            "SFE438"
+          ],
+          "coreSlots": [
+            {
+              "label": "Probability & Statistics Elective",
+              "credits": 3
+            },
+            {
+              "label": "SFE/CSC Upper Level Elective",
+              "credits": 3
+            },
+            {
+              "label": "Philosophy OR Theology Core",
+              "credits": 3
+            }
+          ]
+        },
+        {
+          "year": 4,
+          "semester": 2,
+          "label": "Senior Spring",
+          "courses": [
+            "SFE439"
+          ],
+          "coreSlots": [
+            {
+              "label": "SFE/CSC Upper Level Elective",
+              "credits": 3
+            },
+            {
+              "label": "Catholic Traditions in Fine Arts Core",
+              "credits": 3
+            },
+            {
+              "label": "History Core",
+              "credits": 3
+            },
+            {
+              "label": "Literature Core",
+              "credits": 3
+            }
+          ]
+        }
+      ],
+      "austria": [
+        {
+          "year": 1,
+          "semester": 1,
+          "label": "Freshman Fall",
+          "courses": [
+            "SFE112",
+            "CSC142",
+            "CSC144",
+            "EGR102",
+            "MTH161",
+            "MTH171",
+            "PHL212",
+            "SCI147"
+          ],
+          "coreSlots": []
+        },
+        {
+          "year": 1,
+          "semester": 2,
+          "label": "Freshman Spring",
+          "courses": [
+            "EGR160",
+            "MTH162",
+            "MTH172",
+            "PHY220",
+            "SFE128"
+          ],
+          "coreSlots": [
+            {
+              "label": "Theology Core",
+              "credits": 3
+            }
+          ]
+        },
+        {
+          "year": 2,
+          "semester": 1,
+          "label": "Sophomore Fall",
+          "courses": [
+            "SFE224",
+            "SFE240",
+            "SFE261",
+            "MTH220",
+            "PHY221",
+            "SCI247"
+          ],
+          "coreSlots": [
+            {
+              "label": "Social Science Core",
+              "credits": 3
+            }
+          ]
+        },
+        {
+          "year": 2,
+          "semester": 2,
+          "label": "Sophomore Spring",
+          "courses": [
+            "SFE204",
+            "CSC145",
+            "MTH333",
+            "PHY224",
+            "PHY225"
+          ],
+          "coreSlots": [
+            {
+              "label": "Philosophy Core",
+              "credits": 3
+            }
+          ]
+        },
+        {
+          "year": 3,
+          "semester": 1,
+          "label": "Junior Fall — AUSTRIA SEMESTER",
+          "austriaSemester": true,
+          "austriaNote": "Spend this semester in Gaming, Austria. Take SFE 401 online + 4 Core courses on-site. Requires pre-planning with an academic advisor.",
+          "courses": [
+            "SFE401"
+          ],
+          "coreSlots": [
+            {
+              "label": "Economics Core",
+              "credits": 3
+            },
+            {
+              "label": "History Core",
+              "credits": 3
+            },
+            {
+              "label": "Literature Core",
+              "credits": 3
+            },
+            {
+              "label": "Theology Core",
+              "credits": 3
+            }
+          ]
+        },
+        {
+          "year": 3,
+          "semester": 2,
+          "label": "Junior Spring",
+          "courses": [
+            "EGR230",
+            "SCI347",
+            "SFE340",
+            "SFE305",
+            "SFE384",
+            "SFE385"
+          ],
+          "coreSlots": [
+            {
+              "label": "Cybersecurity Elective",
+              "credits": 3
+            },
+            {
+              "label": "American Founding Principles Core",
+              "credits": 3
+            }
+          ]
+        },
+        {
+          "year": 4,
+          "semester": 1,
+          "label": "Senior Fall",
+          "courses": [
+            "SCI447",
+            "SFE438"
+          ],
+          "coreSlots": [
+            {
+              "label": "Probability & Statistics Elective",
+              "credits": 3
+            },
+            {
+              "label": "SFE/CSC Upper Level Elective",
+              "credits": 3
+            },
+            {
+              "label": "Philosophy OR Theology Core",
+              "credits": 3
+            }
+          ]
+        },
+        {
+          "year": 4,
+          "semester": 2,
+          "label": "Senior Spring",
+          "courses": [
+            "SFE439"
+          ],
+          "coreSlots": [
+            {
+              "label": "SFE/CSC Upper Level Elective",
+              "credits": 3
+            },
+            {
+              "label": "Catholic Traditions in Fine Arts Core",
+              "credits": 3
+            },
+            {
+              "label": "Math/Science Elective",
+              "credits": 3
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "BS_SFE_CYBERSEC",
+    "name": "Software Engineering — Cybersecurity Concentration",
+    "degree": "Bachelor of Science",
+    "totalCredits": 128,
+    "description": "The SFE degree with a dedicated cybersecurity concentration. Covers computer security, network security, software security, and cryptography.",
+    "catalogUrl": "https://franciscan.smartcatalogiq.com/en/2025-2026/undergraduate-catalog-2025-2026/academic-programs/engineering/software-engineering-with-cybersecurity-concentration",
+    "requirementGroups": [
+      {
+        "id": "sfe_core",
+        "label": "SFE Core",
+        "courses": [
+          "SFE112",
+          "SFE128",
+          "SFE204",
+          "SFE224",
+          "SFE240",
+          "SFE261",
+          "SFE305",
+          "SFE340",
+          "SFE384",
+          "SFE385",
+          "SFE401",
+          "SFE438",
+          "SFE439"
+        ]
+      },
+      {
+        "id": "cybersec_concentration",
+        "label": "Cybersecurity Concentration (all required)",
+        "courses": [
+          "SFE364",
+          "SFE365",
+          "SFE366",
+          "CSC330"
+        ]
+      },
+      {
+        "id": "cs_required",
+        "label": "Required CS Courses",
+        "courses": [
+          "CSC142",
+          "CSC144",
+          "CSC145"
+        ]
+      },
+      {
+        "id": "engineering",
+        "label": "Engineering",
+        "courses": [
+          "EGR102",
+          "EGR160",
+          "EGR230"
+        ]
+      },
+      {
+        "id": "math",
+        "label": "Mathematics",
+        "courses": [
+          "MTH161",
+          "MTH162",
+          "MTH171",
+          "MTH172",
+          "MTH220",
+          "MTH333"
+        ]
+      },
+      {
+        "id": "stats",
+        "label": "Probability & Statistics Elective (choose one)",
+        "chooseOne": true,
+        "courses": [
+          "MTH204",
+          "MTH401",
+          "ECO212"
+        ]
+      },
+      {
+        "id": "physics",
+        "label": "Physics",
+        "courses": [
+          "PHY220",
+          "PHY221",
+          "PHY224",
+          "PHY225"
+        ]
+      },
+      {
+        "id": "sci_series",
+        "label": "Catholicism, Science & Technology Series",
+        "courses": [
+          "SCI147",
+          "SCI247",
+          "SCI347",
+          "SCI447"
+        ]
+      },
+      {
+        "id": "ethics",
+        "label": "Ethics",
+        "courses": [
+          "PHL212"
+        ]
+      }
+    ],
+    "fourYearPlan": {
+      "standard": [
+        {
+          "year": 1,
+          "semester": 1,
+          "label": "Freshman Fall",
+          "courses": [
+            "SFE112",
+            "CSC142",
+            "CSC144",
+            "EGR102",
+            "MTH161",
+            "MTH171",
+            "PHL212",
+            "SCI147"
+          ],
+          "coreSlots": []
+        },
+        {
+          "year": 1,
+          "semester": 2,
+          "label": "Freshman Spring",
+          "courses": [
+            "EGR160",
+            "MTH162",
+            "MTH172",
+            "PHY220",
+            "SFE128"
+          ],
+          "coreSlots": [
+            {
+              "label": "Theology Core",
+              "credits": 3
+            }
+          ]
+        },
+        {
+          "year": 2,
+          "semester": 1,
+          "label": "Sophomore Fall",
+          "courses": [
+            "SFE224",
+            "SFE240",
+            "SFE261",
+            "MTH220",
+            "PHY221",
+            "SCI247"
+          ],
+          "coreSlots": [
+            {
+              "label": "Social Science Core",
+              "credits": 3
+            }
+          ]
+        },
+        {
+          "year": 2,
+          "semester": 2,
+          "label": "Sophomore Spring",
+          "courses": [
+            "SFE204",
+            "CSC145",
+            "MTH333",
+            "PHY224",
+            "PHY225"
+          ],
+          "coreSlots": [
+            {
+              "label": "Philosophy Core",
+              "credits": 3
+            }
+          ]
+        },
+        {
+          "year": 3,
+          "semester": 1,
+          "label": "Junior Fall",
+          "austriaNote": "The fifth semester is best suited for a semester abroad in Gaming, Austria.",
+          "courses": [
+            "EGR230",
+            "SFE340",
+            "SCI347",
+            "SFE401",
+            "CSC330"
+          ],
+          "coreSlots": [
+            {
+              "label": "Economics Core",
+              "credits": 3
+            }
+          ]
+        },
+        {
+          "year": 3,
+          "semester": 2,
+          "label": "Junior Spring",
+          "courses": [
+            "SFE305",
+            "SFE364",
+            "SFE384",
+            "SFE385"
+          ],
+          "coreSlots": [
+            {
+              "label": "American Founding Principles Core",
+              "credits": 3
+            },
+            {
+              "label": "Theology Core",
+              "credits": 3
+            }
+          ]
+        },
+        {
+          "year": 4,
+          "semester": 1,
+          "label": "Senior Fall",
+          "courses": [
+            "SFE366",
+            "SFE438",
+            "SCI447"
+          ],
+          "coreSlots": [
+            {
+              "label": "Probability & Statistics Elective",
+              "credits": 3
+            },
+            {
+              "label": "Philosophy OR Theology Core",
+              "credits": 3
+            }
+          ]
+        },
+        {
+          "year": 4,
+          "semester": 2,
+          "label": "Senior Spring",
+          "courses": [
+            "SFE365",
+            "SFE439"
+          ],
+          "coreSlots": [
+            {
+              "label": "Catholic Traditions in Fine Arts Core",
+              "credits": 3
+            },
+            {
+              "label": "History Core",
+              "credits": 3
+            },
+            {
+              "label": "Literature Core",
+              "credits": 3
+            }
+          ]
+        }
+      ]
+    }
+  }
+]

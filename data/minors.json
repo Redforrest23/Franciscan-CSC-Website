@@ -1,0 +1,121 @@
+[
+  {
+    "id": "minor_cs",
+    "name": "Computer Science Minor",
+    "department": "Computer Science",
+    "targetMajors": [
+      "BS_SFE",
+      "BS_SFE_CYBERSEC"
+    ],
+    "description": "For SFE students looking to deepen their computer science foundation. Covers core CS theory including algorithms and data structures.",
+    "catalogUrl": "https://franciscan.smartcatalogiq.com/en/2025-2026/undergraduate-catalog-2025-2026/academic-programs/computer-science/computer-science-minor",
+    "totalCredits": 18,
+    "requirementGroups": [
+      {
+        "id": "cs_minor_required",
+        "label": "Required Courses",
+        "courses": [
+          "CSC144",
+          "CSC145",
+          "CSC204",
+          "CSC344"
+        ]
+      },
+      {
+        "id": "cs_minor_elective1",
+        "label": "CS Upper Level Elective",
+        "elective": true,
+        "count": 1,
+        "courses": []
+      },
+      {
+        "id": "cs_minor_elective2",
+        "label": "CSC or SFE Upper Level Elective",
+        "elective": true,
+        "count": 1,
+        "courses": []
+      }
+    ],
+    "overlapNotes": [
+      "CSC 144, CSC 145 overlap with BS SFE core",
+      "CSC 204 / SFE 204 overlaps with BS SFE core",
+      "CSC 344 is an additional course not in BS SFE"
+    ]
+  },
+  {
+    "id": "minor_sfe",
+    "name": "Software Engineering Minor",
+    "department": "Engineering",
+    "targetMajors": [
+      "BS_CS",
+      "BS_CS_CYBERSEC"
+    ],
+    "description": "For CS students wanting formal software engineering training. Covers requirements, architecture, process, and quality assurance.",
+    "catalogUrl": "https://franciscan.smartcatalogiq.com/en/2025-2026/undergraduate-catalog-2025-2026/academic-programs/engineering/software-engineering-minor",
+    "totalCredits": 17,
+    "requirementGroups": [
+      {
+        "id": "sfe_minor_required",
+        "label": "Required Courses",
+        "courses": [
+          "SFE112",
+          "SFE204",
+          "SFE224",
+          "SFE384"
+        ]
+      },
+      {
+        "id": "sfe_minor_choice",
+        "label": "Choose one",
+        "chooseOne": true,
+        "courses": [
+          "SFE240"
+        ]
+      },
+      {
+        "id": "sfe_minor_elective",
+        "label": "SFE or CSC Upper Level Elective",
+        "elective": true,
+        "count": 1,
+        "courses": []
+      }
+    ],
+    "overlapNotes": [
+      "SFE 204 / CSC 204 overlaps with BS CS core",
+      "SFE 240 overlaps with BS CS core",
+      "SFE 112, SFE 224, SFE 384 are additional courses not in BS CS"
+    ]
+  },
+  {
+    "id": "minor_cybersec",
+    "name": "Cybersecurity Minor",
+    "department": "Engineering",
+    "targetMajors": [
+      "BS_CS",
+      "BS_CS_CYBERSEC",
+      "BS_SFE",
+      "BS_SFE_CYBERSEC"
+    ],
+    "description": "Available to any major. Covers networking, cryptography, and the three Cybersecurity course sequence.",
+    "catalogUrl": "https://franciscan.smartcatalogiq.com/en/2025-2026/undergraduate-catalog-2025-2026/academic-programs/engineering/cybersecurity-minor",
+    "totalCredits": 15,
+    "requirementGroups": [
+      {
+        "id": "cybersec_minor_required",
+        "label": "Required Courses",
+        "courses": [
+          "SFE240",
+          "CSC330",
+          "SFE364",
+          "SFE365",
+          "SFE366"
+        ]
+      }
+    ],
+    "overlapNotes": [
+      "SFE 240 overlaps with BS CS and BS SFE core",
+      "CSC 330 / MTH 330 / SFE 330 counts as Cybersecurity Elective in BS SFE",
+      "SFE 364, SFE 365, SFE 366 are the full cybersecurity sequence — already required in SFE Cybersecurity Concentration"
+    ]
+  }
+]

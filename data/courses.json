@@ -1,0 +1,977 @@
+[
+  {
+    "id": "CSC142",
+    "code": "CSC 142",
+    "title": "Object-Oriented Programming Lab",
+    "credits": 1,
+    "description": "Laboratory component for CSC 144. Hands-on practice with object-oriented programming concepts.",
+    "prerequisites": [],
+    "corequisites": [
+      "CSC144"
+    ],
+    "offered": [
+      "fall",
+      "spring"
+    ],
+    "tags": [
+      "cs-core",
+      "sfe-core"
+    ],
+    "portSearch": "CSC 142"
+  },
+  {
+    "id": "CSC144",
+    "code": "CSC 144",
+    "title": "Object-Oriented Programming",
+    "credits": 3,
+    "description": "Introduction to object-oriented programming principles. Covers classes, inheritance, polymorphism, and encapsulation.",
+    "prerequisites": [],
+    "corequisites": [
+      "CSC142"
+    ],
+    "offered": [
+      "fall",
+      "spring"
+    ],
+    "tags": [
+      "cs-core",
+      "sfe-core"
+    ],
+    "portSearch": "CSC 144"
+  },
+  {
+    "id": "CSC145",
+    "code": "CSC 145",
+    "title": "Data Structures",
+    "credits": 3,
+    "description": "Study of fundamental data structures including linked lists, stacks, queues, trees, and graphs, with algorithm analysis.",
+    "prerequisites": [
+      "CSC144"
+    ],
+    "offered": [
+      "spring"
+    ],
+    "tags": [
+      "cs-core",
+      "sfe-core"
+    ],
+    "portSearch": "CSC 145"
+  },
+  {
+    "id": "CSC204",
+    "code": "CSC 204 / SFE 204",
+    "title": "Software Architecture and Patterns",
+    "credits": 3,
+    "description": "Study of software design patterns and architectural principles for building scalable, maintainable systems.",
+    "prerequisites": [
+      "CSC145"
+    ],
+    "offered": [
+      "spring"
+    ],
+    "tags": [
+      "cs-core",
+      "sfe-core",
+      "cs-minor",
+      "sfe-minor"
+    ],
+    "portSearch": "CSC 204"
+  },
+  {
+    "id": "CSC261",
+    "code": "CSC 261 / SFE 261",
+    "title": "Database and Information Processing Systems",
+    "credits": 3,
+    "description": "Covers relational database design, SQL, and information processing systems. NOTE: Most upper-level Math and CS courses offered in alternate years.",
+    "prerequisites": [
+      "CSC144"
+    ],
+    "offered": [
+      "fall"
+    ],
+    "tags": [
+      "cs-core",
+      "sfe-core"
+    ],
+    "portSearch": "CSC 261"
+  },
+  {
+    "id": "CSC265",
+    "code": "CSC 265",
+    "title": "Intro to AI/ML Programming",
+    "credits": 3,
+    "description": "Introduction to artificial intelligence and machine learning programming concepts and applications.",
+    "prerequisites": [
+      "CSC145"
+    ],
+    "offered": [
+      "spring"
+    ],
+    "tags": [
+      "cs-core",
+      "elective"
+    ],
+    "portSearch": "CSC 265"
+  },
+  {
+    "id": "CSC276",
+    "code": "CSC 276",
+    "title": "Intro to Distributed and Cloud Computing",
+    "credits": 3,
+    "description": "Fundamentals of distributed systems and cloud computing architectures and services.",
+    "prerequisites": [
+      "CSC261"
+    ],
+    "offered": [
+      "fall"
+    ],
+    "tags": [
+      "cs-core",
+      "elective"
+    ],
+    "portSearch": "CSC 276"
+  },
+  {
+    "id": "CSC310",
+    "code": "CSC 310",
+    "title": "Programming Languages",
+    "credits": 3,
+    "description": "Survey of programming language paradigms including functional, logical, and imperative languages.",
+    "prerequisites": [
+      "CSC344"
+    ],
+    "offered": [
+      "spring"
+    ],
+    "tags": [
+      "cs-core",
+      "elective"
+    ],
+    "portSearch": "CSC 310"
+  },
+  {
+    "id": "CSC330",
+    "code": "MTH 330 / CSC 330 / SFE 330",
+    "title": "Cryptography",
+    "credits": 3,
+    "description": "Mathematical foundations of cryptography including symmetric and asymmetric encryption, hash functions, and protocols.",
+    "prerequisites": [
+      "MTH220"
+    ],
+    "offered": [
+      "fall"
+    ],
+    "tags": [
+      "cybersecurity",
+      "elective",
+      "cs-elective",
+      "sfe-elective"
+    ],
+    "portSearch": "CSC 330"
+  },
+  {
+    "id": "CSC335",
+    "code": "CSC 335 / MTH 335",
+    "title": "Junior Seminar",
+    "credits": 1,
+    "description": "Junior-level seminar for CS and Math students. Professional development and academic discourse.",
+    "prerequisites": [],
+    "offered": [
+      "spring"
+    ],
+    "tags": [
+      "cs-core"
+    ],
+    "portSearch": "CSC 335"
+  },
+  {
+    "id": "CSC344",
+    "code": "CSC 344",
+    "title": "Algorithms and Complexity",
+    "credits": 3,
+    "description": "Design and analysis of algorithms, computational complexity theory, and problem-solving strategies.",
+    "prerequisites": [
+      "CSC145",
+      "MTH220"
+    ],
+    "offered": [
+      "fall"
+    ],
+    "tags": [
+      "cs-core",
+      "cs-minor"
+    ],
+    "portSearch": "CSC 344"
+  },
+  {
+    "id": "CSC391",
+    "code": "CSC 391",
+    "title": "Web Dev: The Front End",
+    "credits": 3,
+    "description": "Modern front-end web development including HTML, CSS, JavaScript, and contemporary frameworks.",
+    "prerequisites": [
+      "CSC145"
+    ],
+    "offered": [
+      "spring"
+    ],
+    "tags": [
+      "cs-core",
+      "web-dev",
+      "elective"
+    ],
+    "portSearch": "CSC 391"
+  },
+  {
+    "id": "CSC392",
+    "code": "CSC 392",
+    "title": "Web Dev: The Back End",
+    "credits": 3,
+    "description": "Server-side web development including APIs, databases, authentication, and deployment.",
+    "prerequisites": [
+      "CSC261"
+    ],
+    "offered": [
+      "spring"
+    ],
+    "tags": [
+      "cs-core",
+      "web-dev",
+      "elective"
+    ],
+    "portSearch": "CSC 392"
+  },
+  {
+    "id": "CSC401",
+    "code": "CSC 401 / SFE 401",
+    "title": "Computer Architecture and Operating Systems",
+    "credits": 3,
+    "description": "Study of computer hardware architecture and operating system design including processes, memory management, and I/O. Also offered online for Austria semester.",
+    "prerequisites": [
+      "CSC344"
+    ],
+    "offered": [
+      "fall",
+      "online"
+    ],
+    "tags": [
+      "cs-core",
+      "sfe-core",
+      "austria-online"
+    ],
+    "portSearch": "CSC 401"
+  },
+  {
+    "id": "CSC438",
+    "code": "CSC 438 / SFE 438",
+    "title": "Senior Capstone Project I",
+    "credits": 3,
+    "description": "First semester of the senior capstone. Students define and begin a substantial software project.",
+    "prerequisites": [
+      "CSC401"
+    ],
+    "offered": [
+      "fall"
+    ],
+    "tags": [
+      "cs-core",
+      "sfe-core",
+      "capstone"
+    ],
+    "portSearch": "CSC 438"
+  },
+  {
+    "id": "CSC439",
+    "code": "CSC 439 / SFE 439",
+    "title": "Senior Capstone Project II",
+    "credits": 3,
+    "description": "Continuation and completion of the senior capstone project with final presentation.",
+    "prerequisites": [
+      "CSC438"
+    ],
+    "offered": [
+      "spring"
+    ],
+    "tags": [
+      "cs-core",
+      "sfe-core",
+      "capstone"
+    ],
+    "portSearch": "CSC 439"
+  },
+  {
+    "id": "SFE112",
+    "code": "SFE 112",
+    "title": "Introduction to Software Engineering",
+    "credits": 2,
+    "description": "Overview of the software engineering discipline, its processes, tools, and professional practices.",
+    "prerequisites": [],
+    "offered": [
+      "fall"
+    ],
+    "tags": [
+      "sfe-core",
+      "sfe-minor"
+    ],
+    "portSearch": "SFE 112"
+  },
+  {
+    "id": "SFE128",
+    "code": "SFE 128",
+    "title": "Linux and Scripting",
+    "credits": 3,
+    "description": "Introduction to Linux operating system and shell scripting for software development and system administration.",
+    "prerequisites": [],
+    "offered": [
+      "spring"
+    ],
+    "tags": [
+      "cs-core",
+      "sfe-core",
+      "elective"
+    ],
+    "portSearch": "SFE 128"
+  },
+  {
+    "id": "SFE224",
+    "code": "SFE 224",
+    "title": "Requirements Analysis",
+    "credits": 3,
+    "description": "Techniques for gathering, analyzing, and documenting software requirements. Offered every other year — check with advisor for sequencing.",
+    "prerequisites": [
+      "SFE112"
+    ],
+    "offered": [
+      "fall"
+    ],
+    "alternateYears": true,
+    "tags": [
+      "sfe-core",
+      "sfe-minor"
+    ],
+    "portSearch": "SFE 224"
+  },
+  {
+    "id": "SFE240",
+    "code": "SFE 240",
+    "title": "Intro to Cybersecurity and Networking",
+    "credits": 3,
+    "description": "Fundamentals of networking protocols and cybersecurity principles including threats, defenses, and best practices.",
+    "prerequisites": [],
+    "offered": [
+      "fall"
+    ],
+    "tags": [
+      "cs-core",
+      "sfe-core",
+      "cybersecurity",
+      "sfe-minor"
+    ],
+    "portSearch": "SFE 240"
+  },
+  {
+    "id": "SFE305",
+    "code": "SFE 305",
+    "title": "Virtue, Technology, and Society",
+    "credits": 3,
+    "description": "Examination of the ethical and moral dimensions of technology within a Catholic intellectual framework.",
+    "prerequisites": [],
+    "offered": [
+      "spring"
+    ],
+    "tags": [
+      "cs-core",
+      "sfe-core",
+      "ethics"
+    ],
+    "portSearch": "SFE 305"
+  },
+  {
+    "id": "SFE340",
+    "code": "SFE 340",
+    "title": "Mathematical Foundations of AI and ML",
+    "credits": 2,
+    "description": "Mathematical foundations underpinning artificial intelligence and machine learning algorithms.",
+    "prerequisites": [
+      "MTH333"
+    ],
+    "offered": [
+      "fall"
+    ],
+    "tags": [
+      "sfe-core",
+      "elective"
+    ],
+    "portSearch": "SFE 340"
+  },
+  {
+    "id": "SFE364",
+    "code": "SFE 364",
+    "title": "Cybersecurity I: Computer Security",
+    "credits": 3,
+    "description": "Principles of computer security including authentication, access control, and vulnerability assessment.",
+    "prerequisites": [
+      "SFE240"
+    ],
+    "offered": [
+      "spring"
+    ],
+    "tags": [
+      "cybersecurity",
+      "sfe-core-cybersec",
+      "elective",
+      "sfe-elective"
+    ],
+    "portSearch": "SFE 364"
+  },
+  {
+    "id": "SFE365",
+    "code": "SFE 365",
+    "title": "Cybersecurity II: Network Security and Management",
+    "credits": 3,
+    "description": "Advanced network security concepts including intrusion detection, firewalls, and security management.",
+    "prerequisites": [
+      "SFE364"
+    ],
+    "offered": [
+      "spring"
+    ],
+    "tags": [
+      "cybersecurity",
+      "sfe-core-cybersec"
+    ],
+    "portSearch": "SFE 365"
+  },
+  {
+    "id": "SFE366",
+    "code": "SFE 366",
+    "title": "Cybersecurity III: Software and Security",
+    "credits": 3,
+    "description": "Secure software development practices, code auditing, and application security.",
+    "prerequisites": [
+      "SFE364"
+    ],
+    "offered": [
+      "fall"
+    ],
+    "tags": [
+      "cybersecurity",
+      "sfe-core-cybersec",
+      "elective",
+      "sfe-elective"
+    ],
+    "portSearch": "SFE 366"
+  },
+  {
+    "id": "SFE384",
+    "code": "SFE 384",
+    "title": "Software Process and Quality Assurance",
+    "credits": 3,
+    "description": "Software development lifecycles, process models, quality assurance, and testing methodologies.",
+    "prerequisites": [
+      "SFE224"
+    ],
+    "offered": [
+      "spring"
+    ],
+    "tags": [
+      "sfe-core",
+      "sfe-minor",
+      "elective"
+    ],
+    "portSearch": "SFE 384"
+  },
+  {
+    "id": "SFE385",
+    "code": "SFE 385",
+    "title": "Software Process and Quality Assurance Lab",
+    "credits": 1,
+    "description": "Laboratory component for SFE 384. Hands-on application of software quality assurance techniques.",
+    "prerequisites": [],
+    "corequisites": [
+      "SFE384"
+    ],
+    "offered": [
+      "spring"
+    ],
+    "tags": [
+      "sfe-core"
+    ],
+    "portSearch": "SFE 385"
+  },
+  {
+    "id": "SFE438",
+    "code": "SFE 438",
+    "title": "Senior Capstone Project I",
+    "credits": 3,
+    "description": "First semester of the senior capstone for SFE majors.",
+    "prerequisites": [
+      "SFE401"
+    ],
+    "offered": [
+      "fall"
+    ],
+    "tags": [
+      "sfe-core",
+      "capstone"
+    ],
+    "portSearch": "SFE 438"
+  },
+  {
+    "id": "SFE439",
+    "code": "SFE 439",
+    "title": "Senior Capstone Project II",
+    "credits": 3,
+    "description": "Completion of the senior capstone project for SFE majors.",
+    "prerequisites": [
+      "SFE438"
+    ],
+    "offered": [
+      "spring"
+    ],
+    "tags": [
+      "sfe-core",
+      "capstone"
+    ],
+    "portSearch": "SFE 439"
+  },
+  {
+    "id": "SFE401",
+    "code": "SFE 401",
+    "title": "Computer Architecture and Operating Systems",
+    "credits": 3,
+    "description": "Study of computer hardware architecture and operating systems for SFE students. Also offered online for Austria semester.",
+    "prerequisites": [
+      "SFE240"
+    ],
+    "offered": [
+      "fall",
+      "online"
+    ],
+    "tags": [
+      "sfe-core",
+      "austria-online"
+    ],
+    "portSearch": "SFE 401"
+  },
+  {
+    "id": "SFE471",
+    "code": "SFE 471",
+    "title": "Advanced Cybersecurity Topics",
+    "credits": 3,
+    "description": "Advanced topics in cybersecurity including forensics, penetration testing, and emerging threats.",
+    "prerequisites": [
+      "SFE366"
+    ],
+    "offered": [
+      "fall"
+    ],
+    "tags": [
+      "cybersecurity",
+      "elective",
+      "sfe-elective"
+    ],
+    "portSearch": "SFE 471"
+  },
+  {
+    "id": "EGR102",
+    "code": "EGR 102",
+    "title": "Introduction to Engineering Analysis",
+    "credits": 1,
+    "description": "Introduction to engineering problem-solving and analysis methodologies.",
+    "prerequisites": [],
+    "offered": [
+      "fall"
+    ],
+    "tags": [
+      "sfe-core",
+      "engineering"
+    ],
+    "portSearch": "EGR 102"
+  },
+  {
+    "id": "EGR160",
+    "code": "EGR 160",
+    "title": "Engineering Analysis",
+    "credits": 3,
+    "description": "Applied engineering analysis including numerical methods and computational tools.",
+    "prerequisites": [
+      "EGR102",
+      "MTH161"
+    ],
+    "offered": [
+      "spring"
+    ],
+    "tags": [
+      "sfe-core",
+      "engineering"
+    ],
+    "portSearch": "EGR 160"
+  },
+  {
+    "id": "EGR230",
+    "code": "EGR 230",
+    "title": "Introduction to Electrical Systems Engineering",
+    "credits": 3,
+    "description": "Fundamentals of electrical circuits and systems for software engineers.",
+    "prerequisites": [
+      "EGR160",
+      "PHY220"
+    ],
+    "offered": [
+      "fall"
+    ],
+    "tags": [
+      "sfe-core",
+      "engineering"
+    ],
+    "portSearch": "EGR 230"
+  },
+  {
+    "id": "MTH161",
+    "code": "MTH 161",
+    "title": "Analytic Geometry and Calculus I",
+    "credits": 4,
+    "description": "Introduction to differential calculus including limits, derivatives, and applications.",
+    "prerequisites": [],
+    "offered": [
+      "fall",
+      "spring"
+    ],
+    "tags": [
+      "cs-core",
+      "sfe-core",
+      "math"
+    ],
+    "portSearch": "MTH 161"
+  },
+  {
+    "id": "MTH162",
+    "code": "MTH 162",
+    "title": "Analytic Geometry and Calculus II",
+    "credits": 4,
+    "description": "Integral calculus, sequences, series, and applications.",
+    "prerequisites": [
+      "MTH161"
+    ],
+    "offered": [
+      "spring"
+    ],
+    "tags": [
+      "sfe-core",
+      "math"
+    ],
+    "portSearch": "MTH 162"
+  },
+  {
+    "id": "MTH171",
+    "code": "MTH 171",
+    "title": "Matrix Theory I",
+    "credits": 1,
+    "description": "Introduction to matrices, vectors, and linear systems.",
+    "prerequisites": [],
+    "offered": [
+      "fall"
+    ],
+    "tags": [
+      "cs-core",
+      "sfe-core",
+      "math"
+    ],
+    "portSearch": "MTH 171"
+  },
+  {
+    "id": "MTH172",
+    "code": "MTH 172",
+    "title": "Matrix Theory II",
+    "credits": 1,
+    "description": "Continuation of matrix theory including eigenvalues and transformations.",
+    "prerequisites": [
+      "MTH171"
+    ],
+    "offered": [
+      "spring"
+    ],
+    "tags": [
+      "cs-core",
+      "sfe-core",
+      "math"
+    ],
+    "portSearch": "MTH 172"
+  },
+  {
+    "id": "MTH204",
+    "code": "MTH 204",
+    "title": "Probability and Statistics",
+    "credits": 3,
+    "description": "Introductory probability and statistics for science and engineering students.",
+    "prerequisites": [
+      "MTH161"
+    ],
+    "offered": [
+      "fall",
+      "spring"
+    ],
+    "tags": [
+      "stats-elective",
+      "math"
+    ],
+    "portSearch": "MTH 204"
+  },
+  {
+    "id": "MTH220",
+    "code": "MTH 220",
+    "title": "Discrete Mathematics",
+    "credits": 3,
+    "description": "Logic, sets, relations, functions, combinatorics, and graph theory as applied to computing.",
+    "prerequisites": [
+      "MTH161"
+    ],
+    "offered": [
+      "fall"
+    ],
+    "tags": [
+      "cs-core",
+      "sfe-core",
+      "math"
+    ],
+    "portSearch": "MTH 220"
+  },
+  {
+    "id": "MTH320",
+    "code": "MTH 320",
+    "title": "Graph Theory",
+    "credits": 3,
+    "description": "Study of graphs and their applications in computer science and combinatorics.",
+    "prerequisites": [
+      "MTH220"
+    ],
+    "offered": [
+      "spring"
+    ],
+    "tags": [
+      "cs-core",
+      "math"
+    ],
+    "portSearch": "MTH 320"
+  },
+  {
+    "id": "MTH333",
+    "code": "MTH 333",
+    "title": "Intermediate Linear Algebra",
+    "credits": 3,
+    "description": "Vector spaces, linear transformations, eigenvalues, and applications.",
+    "prerequisites": [
+      "MTH172",
+      "MTH220"
+    ],
+    "offered": [
+      "spring"
+    ],
+    "tags": [
+      "sfe-core",
+      "math"
+    ],
+    "portSearch": "MTH 333"
+  },
+  {
+    "id": "MTH401",
+    "code": "MTH 401",
+    "title": "Mathematical Statistics",
+    "credits": 3,
+    "description": "Advanced probability theory and mathematical statistics.",
+    "prerequisites": [
+      "MTH162"
+    ],
+    "offered": [
+      "fall"
+    ],
+    "tags": [
+      "stats-elective",
+      "math"
+    ],
+    "portSearch": "MTH 401"
+  },
+  {
+    "id": "PHY220",
+    "code": "PHY 220",
+    "title": "University Physics I",
+    "credits": 3,
+    "description": "Calculus-based mechanics, kinematics, dynamics, energy, and momentum.",
+    "prerequisites": [
+      "MTH161"
+    ],
+    "offered": [
+      "fall"
+    ],
+    "tags": [
+      "sfe-core",
+      "science"
+    ],
+    "portSearch": "PHY 220"
+  },
+  {
+    "id": "PHY221",
+    "code": "PHY 221",
+    "title": "University Physics I Lab",
+    "credits": 1,
+    "description": "Laboratory component for PHY 220.",
+    "prerequisites": [],
+    "corequisites": [
+      "PHY220"
+    ],
+    "offered": [
+      "fall",
+      "spring"
+    ],
+    "tags": [
+      "sfe-core",
+      "science"
+    ],
+    "portSearch": "PHY 221"
+  },
+  {
+    "id": "PHY224",
+    "code": "PHY 224",
+    "title": "University Physics III",
+    "credits": 3,
+    "description": "Electricity, magnetism, circuits, and electromagnetic waves.",
+    "prerequisites": [
+      "PHY220",
+      "MTH162"
+    ],
+    "offered": [
+      "spring"
+    ],
+    "tags": [
+      "sfe-core",
+      "science"
+    ],
+    "portSearch": "PHY 224"
+  },
+  {
+    "id": "PHY225",
+    "code": "PHY 225",
+    "title": "University Physics III Lab",
+    "credits": 1,
+    "description": "Laboratory component for PHY 224.",
+    "prerequisites": [],
+    "corequisites": [
+      "PHY224"
+    ],
+    "offered": [
+      "spring"
+    ],
+    "tags": [
+      "sfe-core",
+      "science"
+    ],
+    "portSearch": "PHY 225"
+  },
+  {
+    "id": "PHL212",
+    "code": "PHL 212",
+    "title": "Foundations of Ethics",
+    "credits": 3,
+    "description": "Introduction to ethical theory in the Catholic philosophical tradition.",
+    "prerequisites": [],
+    "offered": [
+      "fall",
+      "spring"
+    ],
+    "tags": [
+      "cs-core",
+      "sfe-core",
+      "core"
+    ],
+    "portSearch": "PHL 212"
+  },
+  {
+    "id": "SCI147",
+    "code": "SCI 147",
+    "title": "Catholicism, Science, and Technology I",
+    "credits": 1,
+    "description": "First in a series exploring the relationship between Catholic faith and scientific/technological inquiry.",
+    "prerequisites": [],
+    "offered": [
+      "fall"
+    ],
+    "tags": [
+      "cs-core",
+      "sfe-core",
+      "core"
+    ],
+    "portSearch": "SCI 147"
+  },
+  {
+    "id": "SCI247",
+    "code": "SCI 247",
+    "title": "Catholicism, Science, and Technology II",
+    "credits": 1,
+    "description": "Second in the series on Catholicism, science, and technology.",
+    "prerequisites": [
+      "SCI147"
+    ],
+    "offered": [
+      "fall"
+    ],
+    "tags": [
+      "sfe-core",
+      "core"
+    ],
+    "portSearch": "SCI 247"
+  },
+  {
+    "id": "SCI347",
+    "code": "SCI 347",
+    "title": "Catholicism, Science, and Technology III",
+    "credits": 1,
+    "description": "Third in the series on Catholicism, science, and technology.",
+    "prerequisites": [
+      "SCI247"
+    ],
+    "offered": [
+      "fall"
+    ],
+    "tags": [
+      "sfe-core",
+      "core"
+    ],
+    "portSearch": "SCI 347"
+  },
+  {
+    "id": "SCI447",
+    "code": "SCI 447",
+    "title": "Catholicism, Science, and Technology IV",
+    "credits": 1,
+    "description": "Final course in the Catholicism, Science, and Technology series.",
+    "prerequisites": [
+      "SCI347"
+    ],
+    "offered": [
+      "fall"
+    ],
+    "tags": [
+      "sfe-core",
+      "core"
+    ],
+    "portSearch": "SCI 447"
+  },
+  {
+    "id": "ECO212",
+    "code": "ECO 212",
+    "title": "Introduction to Statistics (Economics)",
+    "credits": 3,
+    "description": "Statistical methods applied to economic and social data.",
+    "prerequisites": [],
+    "offered": [
+      "fall",
+      "spring"
+    ],
+    "tags": [
+      "stats-elective",
+      "core"
+    ],
+    "portSearch": "ECO 212"
+  }
+]
