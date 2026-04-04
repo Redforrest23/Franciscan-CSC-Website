@@ -45,6 +45,8 @@ export async function fetchDegrees() {
     const { data, error } = await supabase
         .from('degrees')
         .select('id, name, degree, total_credits, tier, catalog_url')
+        .not('name', 'ilike', '%minor%')
+        .not('name', 'ilike', '%certificate%')
         .order('name', { ascending: true })
 
     if (error) {
@@ -89,8 +91,9 @@ export async function fetchDegreeRequirements(degreeId) {
 /**
  * Fetch all semester plans for a degree, with their courses and core slots.
  */
-export async function fetchSemesterPlans(degreeId, planType = 'standard') {
-    const { data: plans, error: plansError } = await supabase
+export async function fetchSemesterPlans(degreeId) {
+    // Try standard (hand-curated) first, fall back to auto-generated
+    const { data: standardPlans, error: standardError } = await supabase
         .from('degree_semester_plans')
         .select(`
       id,
@@ -99,6 +102,7 @@ export async function fetchSemesterPlans(degreeId, planType = 'standard') {
       label,
       austria_semester,
       austria_note,
+      plan_type,
       degree_semester_courses (
         course_id,
         core_slot_label,
@@ -107,23 +111,62 @@ export async function fetchSemesterPlans(degreeId, planType = 'standard') {
       )
     `)
         .eq('degree_id', degreeId)
-        .eq('plan_type', planType)
+        .eq('plan_type', 'standard')
         .order('year', { ascending: true })
         .order('semester', { ascending: true })
 
-    if (plansError) {
-        console.error('fetchSemesterPlans error:', plansError.message)
+    if (!standardError && standardPlans?.length > 0) {
+        return standardPlans.map((plan) => ({
+            ...plan,
+            entries: [...(plan.degree_semester_courses ?? [])].sort(
+                (a, b) => a.position - b.position
+            ),
+        }))
+    }
+
+    // Fall back to auto-generated
+    const { data: autoPlans, error: autoError } = await supabase
+        .from('degree_semester_plans')
+        .select(`
+      id,
+      year,
+      semester,
+      label,
+      austria_semester,
+      austria_note,
+      plan_type,
+      degree_semester_courses (
+        course_id,
+        core_slot_label,
+        core_slot_credits,
+        position
+      )
+    `)
+        .eq('degree_id', degreeId)
+        .eq('plan_type', 'auto')
+        .order('year', { ascending: true })
+        .order('semester', { ascending: true })
+
+    if (autoError) {
+        console.error('fetchSemesterPlans error:', autoError.message)
         return []
     }
 
-    // Sort each semester's entries by position
-    return (plans ?? []).map((plan) => ({
+    return (autoPlans ?? []).map((plan) => ({
         ...plan,
         entries: [...(plan.degree_semester_courses ?? [])].sort(
             (a, b) => a.position - b.position
         ),
     }))
 }
+
+// Sort each semester's entries by position
+return (plans ?? []).map((plan) => ({
+    ...plan,
+    entries: [...(plan.degree_semester_courses ?? [])].sort(
+        (a, b) => a.position - b.position
+    ),
+}))
 
 // ── User progress ─────────────────────────────────────────
 
