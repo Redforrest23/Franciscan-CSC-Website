@@ -18,7 +18,6 @@ import SemesterColumn from '../components/SemesterColumn'
 import PriorCoursesModal from '../components/PriorCoursesModal'
 import { usePlannedCourses } from '../hooks/usePlannedCourses'
 
-// ── Honors mapping ────────────────────────────────────────
 const HONORS_MAP = [
   { semesterIndex: 0, courseId: 'HON101', replaces: ['literature', 'history'] },
   { semesterIndex: 1, courseId: 'HON102', replaces: ['literature', 'philosophy'] },
@@ -50,7 +49,6 @@ const CORE_DEPARTMENTS = ['HST', 'POL', 'ENG', 'PHL', 'THE', 'ECO', 'SOC', 'PSY'
 export default function Planner() {
   const { user } = useAuth()
 
-  // ── Shared state ──────────────────────────────────────
   const [degrees, setDegrees] = useState([])
   const [selectedDegreeId, setSelectedDegreeId] = useState(null)
   const [suggestedPlans, setSuggestedPlans] = useState([])
@@ -62,14 +60,12 @@ export default function Planner() {
   const [loading, setLoading] = useState(true)
   const [plansLoading, setPlansLoading] = useState(false)
 
-  // ── Mode state ────────────────────────────────────────
   const [viewMode, setViewMode] = useState('suggested')
   const [honorsMode, setHonorsMode] = useState(false)
   const [austriaMode, setAustriaMode] = useState(false)
   const [hasAustria, setHasAustria] = useState(false)
   const [startingSemester, setStartingSemester] = useState(0)
 
-  // ── Personal planner state ────────────────────────────
   const [activeDragId, setActiveDragId] = useState(null)
   const [activeDragType, setActiveDragType] = useState(null)
   const [sidebarSearch, setSidebarSearch] = useState('')
@@ -88,11 +84,11 @@ export default function Planner() {
     addCourse,
     addCoreSlot,
     resetToSuggested,
+    persistSave,
   } = usePlannedCourses(user?.id, selectedDegreeId, suggestedPlans, courses)
 
   const priorSet = new Set(priorCourses.map((p) => p.course_id).filter(Boolean))
 
-  // ── Load degrees ──────────────────────────────────────
   useEffect(() => {
     fetchDegrees().then((data) => {
       setDegrees(data)
@@ -102,7 +98,6 @@ export default function Planner() {
     })
   }, [])
 
-  // ── Load core-eligible courses for dropdowns ──────────
   useEffect(() => {
     fetchCourses().then((all) => {
       const coreEligible = all.filter((c) =>
@@ -112,7 +107,6 @@ export default function Planner() {
     })
   }, [])
 
-  // ── Load completed, prior, ignored warnings ───────────
   useEffect(() => {
     if (!user) {
       setCompletedSet(new Set())
@@ -127,12 +121,10 @@ export default function Planner() {
     })
   }, [user])
 
-  // ── Load semester plans when degree changes ───────────
   useEffect(() => {
     if (!selectedDegreeId) return
     setPlansLoading(true)
     setAustriaMode(false)
-
     Promise.all([
       fetchSemesterPlans(selectedDegreeId),
       hasAustriaPlan(selectedDegreeId),
@@ -144,7 +136,6 @@ export default function Planner() {
     })
   }, [selectedDegreeId])
 
-  // ── Reload when Austria mode changes ──────────────────
   useEffect(() => {
     if (!selectedDegreeId) return
     setPlansLoading(true)
@@ -169,11 +160,9 @@ export default function Planner() {
     }
   }
 
-  // ── Toggle ignore warning ─────────────────────────────
   async function handleToggleIgnore(courseId, warningType, currentlyIgnored) {
     if (!user) return
     const key = `${courseId}:${warningType}`
-    // Optimistic update
     setIgnoredWarnings((prev) => {
       const next = new Set(prev)
       currentlyIgnored ? next.delete(key) : next.add(key)
@@ -181,7 +170,6 @@ export default function Planner() {
     })
     const ok = await toggleIgnoredWarning(user.id, courseId, warningType, currentlyIgnored)
     if (!ok) {
-      // Revert on failure
       setIgnoredWarnings((prev) => {
         const next = new Set(prev)
         currentlyIgnored ? next.add(key) : next.delete(key)
@@ -190,7 +178,6 @@ export default function Planner() {
     }
   }
 
-  // ── Suggested plan helpers ────────────────────────────
   const selectedDegree = degrees.find((d) => d.id === selectedDegreeId)
   const termLabel = (semester) => (semester === 1 ? 'Fall' : 'Spring')
 
@@ -241,7 +228,6 @@ export default function Planner() {
     return entries
   }
 
-  // ── Drag and drop ─────────────────────────────────────
   function handleDragStart(event) {
     const type = event.active.data?.current?.type === 'coreSlot' ? 'coreSlot' : 'course'
     setActiveDragType(type)
@@ -262,7 +248,6 @@ export default function Planner() {
     }
   }
 
-  // ── Sidebar data ──────────────────────────────────────
   const allDegreeCourseIds = [...new Set(
     suggestedPlans.flatMap((p) => p.entries.filter((e) => e.course_id).map((e) => e.course_id))
   )]
@@ -277,9 +262,7 @@ export default function Planner() {
       c.title?.toLowerCase().includes(sidebarSearch.toLowerCase())
     )
 
-  // Collect unique core slot labels across all semesters
-  // Collect unique core slot labels from the SUGGESTED plans (not current semesters)
-  // so they always show in the sidebar regardless of whether they're placed
+  // Always built from suggestedPlans so slots are available even if removed from grid
   const allCoreSlotLabels = (() => {
     const seen = new Set()
     const slots = []
@@ -349,7 +332,6 @@ export default function Planner() {
 
   return (
     <div>
-      {/* Header */}
       <div className="flex items-center gap-4 mb-4 flex-wrap">
         <h1 className="text-2xl font-bold text-fus-green-700">4-Year Planner</h1>
         <select
@@ -361,7 +343,6 @@ export default function Planner() {
         </select>
       </div>
 
-      {/* View mode toggle */}
       <div className="flex items-center gap-2 mb-4 flex-wrap">
         <button
           onClick={() => setViewMode('suggested')}
@@ -383,7 +364,6 @@ export default function Planner() {
 
       {renderToggles()}
 
-      {/* Warnings */}
       {honorsMode && (
         <div className="mb-4 p-3 rounded-lg bg-fus-gold-50 border border-fus-gold-200 text-sm text-fus-gold-800">
           <strong>Honors Program:</strong> HON 101–402 replace select core slots (one per semester). Does <strong>not</strong> cover: Catholic Traditions in Fine Arts, Natural Science, THE 101, or THE 115.
@@ -395,7 +375,6 @@ export default function Planner() {
         </div>
       )}
 
-      {/* My plan controls */}
       {viewMode === 'my-plan' && (
         <div className="flex items-center gap-3 mb-5 flex-wrap">
           <div className="flex items-center gap-2">
@@ -414,6 +393,13 @@ export default function Planner() {
             {saveStatus === 'saving' && <span className="text-xs text-gray-400">Saving...</span>}
             {saveStatus === 'saved' && <span className="text-xs text-fus-green-600">✓ Saved</span>}
             {saveStatus === 'error' && <span className="text-xs text-red-500">Save failed</span>}
+            <button
+              onClick={() => persistSave(semesters)}
+              disabled={saveStatus === 'saving'}
+              className="text-xs bg-fus-green-600 text-white border border-fus-green-600 rounded-lg px-3 py-1.5 hover:bg-fus-green-700 transition-colors disabled:opacity-50"
+            >
+              Save plan
+            </button>
             <button
               onClick={() => setShowResetConfirm(true)}
               className="text-xs text-gray-500 border border-gray-300 rounded-lg px-3 py-1.5 hover:bg-gray-50 transition-colors"
@@ -434,7 +420,7 @@ export default function Planner() {
 
       {plansLoading && <div className="text-gray-400 text-sm py-8 text-center">Loading plan...</div>}
 
-      {/* ── Suggested Plan View ── */}
+      {/* Suggested Plan View */}
       {!plansLoading && viewMode === 'suggested' && (
         <>
           {suggestedPlans.length === 0 && (
@@ -504,7 +490,7 @@ export default function Planner() {
         </>
       )}
 
-      {/* ── My Plan View ── */}
+      {/* My Plan View */}
       {!plansLoading && viewMode === 'my-plan' && initialized && (
         <DndContext collisionDetection={pointerWithin} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
           <div className="flex gap-6">
@@ -522,7 +508,6 @@ export default function Planner() {
                 />
                 <div className="flex flex-col gap-1.5 max-h-[70vh] overflow-y-auto pr-1">
 
-                  {/* Regular courses */}
                   {sidebarCourses.map((course) => {
                     const isPlaced = placedCourseIds.has(course.id)
                     const isDone = completedSet.has(course.id) || priorSet.has(course.id)
@@ -562,7 +547,6 @@ export default function Planner() {
                     )
                   })}
 
-                  {/* Core slot placeholders */}
                   {allCoreSlotLabels.length > 0 && (
                     <>
                       <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide mt-3 mb-1 px-1">
@@ -579,9 +563,10 @@ export default function Planner() {
                             {semesters.map((sem, si) => (
                               <button
                                 key={si}
-                                onClick={() => addCoreSlot?.({
-                                  ...slot,
-                                  id: `${slot.label}-${Date.now()}-${si}`,
+                                onClick={() => addCoreSlot({
+                                  label: slot.label,
+                                  credits: slot.credits,
+                                  assignedCourseId: null,
                                 }, si)}
                                 className="text-xs text-gray-500 bg-gray-100 border border-gray-200 rounded px-1.5 py-0.5 hover:bg-gray-200 transition-colors"
                                 title={`Add to ${sem.label}`}
@@ -639,7 +624,6 @@ export default function Planner() {
         </DndContext>
       )}
 
-      {/* Prior courses modal */}
       {priorModalSemester !== null && (
         <PriorCoursesModal
           userId={user?.id}
@@ -659,7 +643,6 @@ export default function Planner() {
         />
       )}
 
-      {/* Reset confirmation */}
       {showResetConfirm && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full">
