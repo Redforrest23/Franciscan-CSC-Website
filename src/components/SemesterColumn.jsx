@@ -16,6 +16,8 @@ export default function SemesterColumn({
     onRemoveCoreSlot,
     onAssignCoreSlot,
     onOpenPrior,
+    ignoredWarnings = new Set(),
+    onToggleIgnore,
 }) {
     const { setNodeRef, isOver } = useDroppable({
         id: `semester-${semesterIndex}`,
@@ -25,9 +27,7 @@ export default function SemesterColumn({
     const maxCredits = honorsMode ? 19 : 18
 
     const semesterCredits =
-        semester.courseIds.reduce((sum, id) => {
-            return sum + (courses[id]?.credits ?? 3)
-        }, 0) +
+        semester.courseIds.reduce((sum, id) => sum + (courses[id]?.credits ?? 3), 0) +
         semester.coreSlots.reduce((sum, slot) => {
             if (slot.assignedCourseId && courses[slot.assignedCourseId]) {
                 return sum + (courses[slot.assignedCourseId].credits ?? slot.credits ?? 3)
@@ -41,10 +41,10 @@ export default function SemesterColumn({
         <div
             ref={setNodeRef}
             className={`rounded-xl border-2 transition-colors p-3 min-h-48 ${isPast
-                ? 'border-fus-green-200 bg-fus-green-50 opacity-75'
-                : isOver
-                    ? 'border-fus-gold-400 bg-fus-gold-50'
-                    : 'border-gray-200 bg-white'
+                    ? 'border-fus-green-200 bg-fus-green-50 opacity-75'
+                    : isOver
+                        ? 'border-fus-gold-400 bg-fus-gold-50'
+                        : 'border-gray-200 bg-white'
                 }`}
         >
             <div className="flex items-center justify-between mb-2">
@@ -52,8 +52,8 @@ export default function SemesterColumn({
                     {semester.label}
                 </h3>
                 <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${overloaded
-                    ? 'text-red-600 bg-red-50 border border-red-200'
-                    : 'text-fus-green-600 bg-fus-green-50'
+                        ? 'text-red-600 bg-red-50 border border-red-200'
+                        : 'text-fus-green-600 bg-fus-green-50'
                     }`}>
                     {semesterCredits} cr {overloaded ? '⚠' : ''}
                 </span>
@@ -95,6 +95,8 @@ export default function SemesterColumn({
                             allSemesters={allSemesters}
                             onRemove={onRemove}
                             isCompleted={completedSet.has(courseId) || priorSet.has(courseId)}
+                            ignoredWarnings={ignoredWarnings}
+                            onToggleIgnore={onToggleIgnore}
                         />
                     )
                 })}
@@ -110,13 +112,11 @@ export default function SemesterColumn({
                     />
                 ))}
 
-                {!isPast &&
-                    semester.courseIds.length === 0 &&
-                    semester.coreSlots.length === 0 && (
-                        <div className="text-xs text-gray-300 text-center py-4 italic">
-                            Drop courses here
-                        </div>
-                    )}
+                {!isPast && semester.courseIds.length === 0 && semester.coreSlots.length === 0 && (
+                    <div className="text-xs text-gray-300 text-center py-4 italic">
+                        Drop courses here
+                    </div>
+                )}
             </div>
         </div>
     )

@@ -222,6 +222,38 @@ export async function deletePriorCourse(userId, courseId) {
     return !error
 }
 
+// ── Ignored warnings ──────────────────────────────────────
+
+export async function fetchIgnoredWarnings(userId) {
+    const { data, error } = await supabase
+        .from('ignored_warnings')
+        .select('course_id, warning_type')
+        .eq('user_id', userId)
+
+    if (error) {
+        console.error('fetchIgnoredWarnings error:', error.message)
+        return []
+    }
+    return data ?? []
+}
+
+export async function toggleIgnoredWarning(userId, courseId, warningType, currentlyIgnored) {
+    if (currentlyIgnored) {
+        const { error } = await supabase
+            .from('ignored_warnings')
+            .delete()
+            .eq('user_id', userId)
+            .eq('course_id', courseId)
+            .eq('warning_type', warningType)
+        return !error
+    } else {
+        const { error } = await supabase
+            .from('ignored_warnings')
+            .insert({ user_id: userId, course_id: courseId, warning_type: warningType })
+        return !error
+    }
+}
+
 // ── User progress ─────────────────────────────────────────
 
 export async function fetchCompletedCourses(userId) {
