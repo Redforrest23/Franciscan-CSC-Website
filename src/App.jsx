@@ -10,7 +10,7 @@ import Login from './pages/Login'
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter basename="/fus-cs-planner">
+      <BrowserRouter basename="/Franciscan-CSC-Website">
         <Navbar />
         <main className="max-w-5xl mx-auto px-4 py-8">
           <Routes>
