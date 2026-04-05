@@ -31,7 +31,13 @@ export function AuthProvider({ children }) {
     supabase.auth.signInWithPassword({ email, password })
 
   const signUpWithEmail = async (email, password) => {
-    const { data, error } = await supabase.auth.signUp({ email, password })
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: 'https://redforrest23.github.io/Franciscan-CSC-Website/login',
+      },
+    })
     if (error) return { error }
 
     // Create profile manually after signup
