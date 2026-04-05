@@ -171,7 +171,6 @@ export function usePlannedCourses(userId, degreeId, suggestedPlans, courses) {
         })
     }, [])
 
-    // Remove a core slot entirely from the plan
     const removeCoreSlot = useCallback((slotId) => {
         setSemesters((prev) => {
             const next = prev.map((s) => ({
@@ -183,7 +182,6 @@ export function usePlannedCourses(userId, degreeId, suggestedPlans, courses) {
         })
     }, [])
 
-    // Assign (or clear) a specific course to a core slot
     const assignCoreSlot = useCallback((slotId, courseId) => {
         setSemesters((prev) => {
             const next = prev.map((s) => ({
@@ -223,6 +221,24 @@ export function usePlannedCourses(userId, degreeId, suggestedPlans, courses) {
         })
     }, [])
 
+    // Add a core slot placeholder to a specific semester
+    const addCoreSlot = useCallback((slotTemplate, semesterIndex) => {
+        setSemesters((prev) => {
+            const newSlot = {
+                ...slotTemplate,
+                id: `${slotTemplate.label}-${Date.now()}`,
+                assignedCourseId: null,
+            }
+            const next = prev.map((s, i) =>
+                i === semesterIndex
+                    ? { ...s, coreSlots: [...s.coreSlots, newSlot] }
+                    : s
+            )
+            scheduleSave(next)
+            return next
+        })
+    }, [])
+
     return {
         semesters,
         saveStatus,
@@ -233,6 +249,7 @@ export function usePlannedCourses(userId, degreeId, suggestedPlans, courses) {
         assignCoreSlot,
         removeCourse,
         addCourse,
+        addCoreSlot,
         resetToSuggested,
     }
 }
