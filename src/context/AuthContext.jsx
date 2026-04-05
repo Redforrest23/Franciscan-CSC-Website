@@ -30,8 +30,24 @@ export function AuthProvider({ children }) {
   const signInWithEmail = (email, password) =>
     supabase.auth.signInWithPassword({ email, password })
 
-  const signUpWithEmail = (email, password) =>
-    supabase.auth.signUp({ email, password })
+  const signUpWithEmail = async (email, password) => {
+    const { data, error } = await supabase.auth.signUp({ email, password })
+    if (error) return { error }
+
+    // Create profile manually after signup
+    if (data?.user) {
+      await supabase
+        .from('profiles')
+        .insert({
+          id: data.user.id,
+          display_name: email,
+          major_id: 'BS_CS'
+        })
+        .single()
+    }
+
+    return { data, error: null }
+  }
 
   const signOut = () => supabase.auth.signOut()
 

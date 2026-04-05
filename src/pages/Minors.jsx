@@ -87,7 +87,7 @@ export default function Minors() {
           className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-fus-gold-400"
         >
           {minorsData.map((m) => (
-            <option key={m.id} value={m.id}>{m.title}</option>
+            <option key={m.id} value={m.id}>{m.name}</option>
           ))}
         </select>
 
@@ -131,18 +131,18 @@ export default function Minors() {
           <div className="mb-6 p-4 rounded-xl bg-white border border-gray-200 shadow-sm">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 className="text-lg font-semibold text-fus-green-700">{minor.title}</h2>
+                <h2 className="text-lg font-semibold text-fus-green-700">{minor.name}</h2>
                 <p className="text-sm text-gray-500 mt-1">{minor.description}</p>
                 <p className="text-xs text-gray-400 mt-1">
-                  {minor.creditsRequired} credits required
+                  {minor.totalCredits} credits required
                 </p>
               </div>
               {user && (
                 <button
                   onClick={() => handleToggleMinor(minor.id)}
                   className={`text-sm px-4 py-2 rounded-lg border transition-all flex-shrink-0 ${savedMinors.includes(minor.id)
-                      ? 'bg-fus-green-600 text-white border-fus-green-600'
-                      : 'bg-white text-gray-700 border-gray-300 hover:border-fus-green-400'
+                    ? 'bg-fus-green-600 text-white border-fus-green-600'
+                    : 'bg-white text-gray-700 border-gray-300 hover:border-fus-green-400'
                     }`}
                 >
                   {savedMinors.includes(minor.id) ? '✓ Added to my plan' : '+ Add to my plan'}
