@@ -278,16 +278,25 @@ export default function Planner() {
     )
 
   // Collect unique core slot labels across all semesters
+  // Collect unique core slot labels from the SUGGESTED plans (not current semesters)
+  // so they always show in the sidebar regardless of whether they're placed
   const allCoreSlotLabels = (() => {
     const seen = new Set()
     const slots = []
-    semesters.forEach((sem) => {
-      sem.coreSlots.forEach((slot) => {
-        if (!seen.has(slot.label)) {
-          seen.add(slot.label)
-          slots.push(slot)
-        }
-      })
+    suggestedPlans.forEach((plan, planIndex) => {
+      plan.entries
+        .filter((e) => !e.course_id && e.core_slot_label)
+        .forEach((e, slotIdx) => {
+          if (!seen.has(e.core_slot_label)) {
+            seen.add(e.core_slot_label)
+            slots.push({
+              id: `coreSlot-${planIndex}-${slotIdx}`,
+              label: e.core_slot_label,
+              credits: e.core_slot_credits ?? 3,
+              assignedCourseId: null,
+            })
+          }
+        })
     })
     return slots.filter((slot) =>
       !sidebarSearch ||
@@ -521,10 +530,10 @@ export default function Planner() {
                       <div
                         key={course.id}
                         className={`rounded-lg border px-2.5 py-2 transition-colors ${isDone
-                            ? 'border-fus-green-200 bg-fus-green-50 opacity-50'
-                            : isPlaced
-                              ? 'border-gray-200 bg-gray-50 opacity-60'
-                              : 'border-gray-200 bg-white'
+                          ? 'border-fus-green-200 bg-fus-green-50 opacity-50'
+                          : isPlaced
+                            ? 'border-gray-200 bg-gray-50 opacity-60'
+                            : 'border-gray-200 bg-white'
                           }`}
                       >
                         <div className="flex items-center justify-between gap-1">
