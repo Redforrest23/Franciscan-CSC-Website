@@ -35,7 +35,7 @@ export function AuthProvider({ children }) {
       email,
       password,
       options: {
-        emailRedirectTo: 'https://redforrest23.github.io/Franciscan-CSC-Website/login',
+        emailRedirectTo: 'https://redforrest23.github.io/Franciscan-CSC-Website',
       },
     })
     if (error) return { error }
