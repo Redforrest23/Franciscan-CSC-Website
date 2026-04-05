@@ -45,16 +45,16 @@ export async function fetchDegreeRequirements(degreeId) {
     const { data: groups, error: groupsError } = await supabase
         .from('degree_requirement_groups')
         .select(`
-      id,
-      label,
-      choose_one,
-      elective,
-      elective_count,
-      position,
-      degree_requirement_courses (
-        course_id
-      )
-    `)
+            id,
+            label,
+            choose_one,
+            elective,
+            elective_count,
+            position,
+            degree_requirement_courses (
+                course_id
+            )
+        `)
         .eq('degree_id', degreeId)
         .order('position', { ascending: true })
 
@@ -71,20 +71,20 @@ export async function fetchDegreeRequirements(degreeId) {
 
 export async function fetchSemesterPlans(degreeId, planType = null) {
     const selectQuery = `
-    id,
-    year,
-    semester,
-    label,
-    austria_semester,
-    austria_note,
-    plan_type,
-    degree_semester_courses (
-      course_id,
-      core_slot_label,
-      core_slot_credits,
-      position
-    )
-  `
+        id,
+        year,
+        semester,
+        label,
+        austria_semester,
+        austria_note,
+        plan_type,
+        degree_semester_courses (
+            course_id,
+            core_slot_label,
+            core_slot_credits,
+            position
+        )
+    `
 
     if (planType) {
         const { data, error } = await supabase
@@ -254,6 +254,46 @@ export async function toggleCompletedCourse(userId, courseId, currentlyCompleted
 }
 
 // ── Minors ────────────────────────────────────────────────
+
+export async function fetchMinors() {
+    const { data, error } = await supabase
+        .from('minors')
+        .select('id, name, department, total_credits, description, catalog_url')
+        .order('name', { ascending: true })
+
+    if (error) {
+        console.error('fetchMinors error:', error.message)
+        return []
+    }
+    return data ?? []
+}
+
+export async function fetchMinorRequirements(minorId) {
+    const { data: groups, error } = await supabase
+        .from('minor_requirement_groups')
+        .select(`
+            id,
+            label,
+            choose_one,
+            elective,
+            position,
+            minor_requirement_courses (
+                course_id
+            )
+        `)
+        .eq('minor_id', minorId)
+        .order('position', { ascending: true })
+
+    if (error) {
+        console.error('fetchMinorRequirements error:', error.message)
+        return []
+    }
+
+    return (groups ?? []).map((g) => ({
+        ...g,
+        courses: (g.minor_requirement_courses ?? []).map((r) => r.course_id),
+    }))
+}
 
 export async function fetchSelectedMinors(userId) {
     const { data, error } = await supabase
