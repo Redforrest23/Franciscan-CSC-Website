@@ -45,16 +45,16 @@ export async function fetchDegreeRequirements(degreeId) {
     const { data: groups, error: groupsError } = await supabase
         .from('degree_requirement_groups')
         .select(`
-            id,
-            label,
-            choose_one,
-            elective,
-            elective_count,
-            position,
-            degree_requirement_courses (
-                course_id
-            )
-        `)
+      id,
+      label,
+      choose_one,
+      elective,
+      elective_count,
+      position,
+      degree_requirement_courses (
+        course_id
+      )
+    `)
         .eq('degree_id', degreeId)
         .order('position', { ascending: true })
 
@@ -71,20 +71,20 @@ export async function fetchDegreeRequirements(degreeId) {
 
 export async function fetchSemesterPlans(degreeId, planType = null) {
     const selectQuery = `
-        id,
-        year,
-        semester,
-        label,
-        austria_semester,
-        austria_note,
-        plan_type,
-        degree_semester_courses (
-            course_id,
-            core_slot_label,
-            core_slot_credits,
-            position
-        )
-    `
+    id,
+    year,
+    semester,
+    label,
+    austria_semester,
+    austria_note,
+    plan_type,
+    degree_semester_courses (
+      course_id,
+      core_slot_label,
+      core_slot_credits,
+      position
+    )
+  `
 
     if (planType) {
         const { data, error } = await supabase
@@ -101,9 +101,7 @@ export async function fetchSemesterPlans(degreeId, planType = null) {
         }
         return (data ?? []).map((plan) => ({
             ...plan,
-            entries: [...(plan.degree_semester_courses ?? [])].sort(
-                (a, b) => a.position - b.position
-            ),
+            entries: [...(plan.degree_semester_courses ?? [])].sort((a, b) => a.position - b.position),
         }))
     }
 
@@ -119,9 +117,7 @@ export async function fetchSemesterPlans(degreeId, planType = null) {
     if (!standardError && standardPlans?.length > 0) {
         return standardPlans.map((plan) => ({
             ...plan,
-            entries: [...(plan.degree_semester_courses ?? [])].sort(
-                (a, b) => a.position - b.position
-            ),
+            entries: [...(plan.degree_semester_courses ?? [])].sort((a, b) => a.position - b.position),
         }))
     }
 
@@ -140,9 +136,7 @@ export async function fetchSemesterPlans(degreeId, planType = null) {
 
     return (autoPlans ?? []).map((plan) => ({
         ...plan,
-        entries: [...(plan.degree_semester_courses ?? [])].sort(
-            (a, b) => a.position - b.position
-        ),
+        entries: [...(plan.degree_semester_courses ?? [])].sort((a, b) => a.position - b.position),
     }))
 }
 
@@ -156,6 +150,28 @@ export async function hasAustriaPlan(degreeId) {
 
     if (error) return false
     return (data?.length ?? 0) > 0
+}
+
+// ── Planner preferences ───────────────────────────────────
+
+export async function fetchPlannerPreferences(userId) {
+    const { data, error } = await supabase
+        .from('profiles')
+        .select('planner_preferences')
+        .eq('id', userId)
+        .single()
+
+    if (error || !data) return {}
+    return data.planner_preferences ?? {}
+}
+
+export async function savePlannerPreferences(userId, prefs) {
+    const { error } = await supabase
+        .from('profiles')
+        .update({ planner_preferences: prefs, updated_at: new Date().toISOString() })
+        .eq('id', userId)
+
+    return !error
 }
 
 // ── Planned courses ───────────────────────────────────────
@@ -183,11 +199,7 @@ export async function savePlannedCourses(userId, degreeId, rows) {
         .eq('degree_id', degreeId)
 
     if (!rows.length) return true
-
-    const { error } = await supabase
-        .from('planned_courses')
-        .insert(rows)
-
+    const { error } = await supabase.from('planned_courses').insert(rows)
     return !error
 }
 
@@ -222,39 +234,7 @@ export async function deletePriorCourse(userId, courseId) {
     return !error
 }
 
-// ── Ignored warnings ──────────────────────────────────────
-
-export async function fetchIgnoredWarnings(userId) {
-    const { data, error } = await supabase
-        .from('ignored_warnings')
-        .select('course_id, warning_type')
-        .eq('user_id', userId)
-
-    if (error) {
-        console.error('fetchIgnoredWarnings error:', error.message)
-        return []
-    }
-    return data ?? []
-}
-
-export async function toggleIgnoredWarning(userId, courseId, warningType, currentlyIgnored) {
-    if (currentlyIgnored) {
-        const { error } = await supabase
-            .from('ignored_warnings')
-            .delete()
-            .eq('user_id', userId)
-            .eq('course_id', courseId)
-            .eq('warning_type', warningType)
-        return !error
-    } else {
-        const { error } = await supabase
-            .from('ignored_warnings')
-            .insert({ user_id: userId, course_id: courseId, warning_type: warningType })
-        return !error
-    }
-}
-
-// ── User progress ─────────────────────────────────────────
+// ── Completed courses ─────────────────────────────────────
 
 export async function fetchCompletedCourses(userId) {
     const { data, error } = await supabase
@@ -285,47 +265,36 @@ export async function toggleCompletedCourse(userId, courseId, currentlyCompleted
     }
 }
 
-// ── Minors ────────────────────────────────────────────────
+// ── Ignored warnings ──────────────────────────────────────
 
-export async function fetchMinors() {
+export async function fetchIgnoredWarnings(userId) {
     const { data, error } = await supabase
-        .from('minors')
-        .select('id, name, department, total_credits, description, catalog_url')
-        .order('name', { ascending: true })
+        .from('ignored_warnings')
+        .select('course_id, warning_type')
+        .eq('user_id', userId)
 
-    if (error) {
-        console.error('fetchMinors error:', error.message)
-        return []
-    }
+    if (error) return []
     return data ?? []
 }
 
-export async function fetchMinorRequirements(minorId) {
-    const { data: groups, error } = await supabase
-        .from('minor_requirement_groups')
-        .select(`
-            id,
-            label,
-            choose_one,
-            elective,
-            position,
-            minor_requirement_courses (
-                course_id
-            )
-        `)
-        .eq('minor_id', minorId)
-        .order('position', { ascending: true })
-
-    if (error) {
-        console.error('fetchMinorRequirements error:', error.message)
-        return []
+export async function toggleIgnoredWarning(userId, courseId, warningType, currentlyIgnored) {
+    if (currentlyIgnored) {
+        const { error } = await supabase
+            .from('ignored_warnings')
+            .delete()
+            .eq('user_id', userId)
+            .eq('course_id', courseId)
+            .eq('warning_type', warningType)
+        return !error
+    } else {
+        const { error } = await supabase
+            .from('ignored_warnings')
+            .insert({ user_id: userId, course_id: courseId, warning_type: warningType })
+        return !error
     }
-
-    return (groups ?? []).map((g) => ({
-        ...g,
-        courses: (g.minor_requirement_courses ?? []).map((r) => r.course_id),
-    }))
 }
+
+// ── Minors ────────────────────────────────────────────────
 
 export async function fetchSelectedMinors(userId) {
     const { data, error } = await supabase

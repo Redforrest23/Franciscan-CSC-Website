@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../context/AuthContext'
 import {
   fetchDegrees,
@@ -7,13 +7,14 @@ import {
   fetchCompletedCourses,
   fetchPriorCourses,
   fetchIgnoredWarnings,
+  fetchPlannerPreferences,
+  savePlannerPreferences,
   toggleIgnoredWarning,
   courseMap,
   hasAustriaPlan,
 } from '../lib/db'
 import { DndContext, DragOverlay, pointerWithin } from '@dnd-kit/core'
 import CourseCard from '../components/CourseCard'
-import PlannerCourseCard from '../components/PlannerCourseCard'
 import SemesterColumn from '../components/SemesterColumn'
 import PriorCoursesModal from '../components/PriorCoursesModal'
 import { usePlannedCourses } from '../hooks/usePlannedCourses'
@@ -59,6 +60,7 @@ export default function Planner() {
   const [ignoredWarnings, setIgnoredWarnings] = useState(new Set())
   const [loading, setLoading] = useState(true)
   const [plansLoading, setPlansLoading] = useState(false)
+  const [prefsLoaded, setPrefsLoaded] = useState(false)
 
   const [viewMode, setViewMode] = useState('suggested')
   const [honorsMode, setHonorsMode] = useState(false)
@@ -80,15 +82,16 @@ export default function Planner() {
     moveCoreSlot,
     removeCoreSlot,
     assignCoreSlot,
+    addCoreSlot,
     removeCourse,
     addCourse,
-    addCoreSlot,
     resetToSuggested,
-    persistSave,
+    saveNow,
   } = usePlannedCourses(user?.id, selectedDegreeId, suggestedPlans, courses)
 
   const priorSet = new Set(priorCourses.map((p) => p.course_id).filter(Boolean))
 
+  // Load degrees
   useEffect(() => {
     fetchDegrees().then((data) => {
       setDegrees(data)
@@ -98,35 +101,55 @@ export default function Planner() {
     })
   }, [])
 
+  // Load core-eligible courses for slot dropdowns
   useEffect(() => {
     fetchCourses().then((all) => {
-      const coreEligible = all.filter((c) =>
-        CORE_DEPARTMENTS.some((dept) => c.id?.startsWith(dept) || c.code?.startsWith(dept))
+      setAllCoursesForDropdown(
+        all.filter((c) =>
+          CORE_DEPARTMENTS.some((dept) => c.id?.startsWith(dept) || c.code?.startsWith(dept))
+        )
       )
-      setAllCoursesForDropdown(coreEligible)
     })
   }, [])
 
+  // Load user data + preferences
   useEffect(() => {
     if (!user) {
       setCompletedSet(new Set())
       setPriorCourses([])
       setIgnoredWarnings(new Set())
+      setPrefsLoaded(true)
       return
     }
+
     fetchCompletedCourses(user.id).then(setCompletedSet)
     fetchPriorCourses(user.id).then(setPriorCourses)
     fetchIgnoredWarnings(user.id).then((rows) => {
       setIgnoredWarnings(new Set(rows.map((r) => `${r.course_id}:${r.warning_type}`)))
     })
+
+    // Load saved planner preferences and restore them
+    fetchPlannerPreferences(user.id).then((prefs) => {
+      if (prefs.austriaMode !== undefined) setAustriaMode(prefs.austriaMode)
+      if (prefs.honorsMode !== undefined) setHonorsMode(prefs.honorsMode)
+      if (prefs.startingSemester !== undefined) setStartingSemester(prefs.startingSemester)
+      setPrefsLoaded(true)
+    })
   }, [user])
 
+  // Persist preferences whenever they change (after initial load)
+  useEffect(() => {
+    if (!user || !prefsLoaded) return
+    savePlannerPreferences(user.id, { austriaMode, honorsMode, startingSemester })
+  }, [austriaMode, honorsMode, startingSemester, user, prefsLoaded])
+
+  // Load semester plans when degree changes
   useEffect(() => {
     if (!selectedDegreeId) return
     setPlansLoading(true)
-    setAustriaMode(false)
+
     Promise.all([
-      fetchSemesterPlans(selectedDegreeId),
+      fetchSemesterPlans(selectedDegreeId, austriaMode ? 'austria' : null),
       hasAustriaPlan(selectedDegreeId),
     ]).then(async ([plans, austriaAvailable]) => {
       setHasAustria(austriaAvailable)
@@ -136,11 +159,11 @@ export default function Planner() {
     })
   }, [selectedDegreeId])
 
+  // Reload plans when Austria mode changes
   useEffect(() => {
     if (!selectedDegreeId) return
     setPlansLoading(true)
-    const planType = austriaMode ? 'austria' : null
-    fetchSemesterPlans(selectedDegreeId, planType).then(async (plans) => {
+    fetchSemesterPlans(selectedDegreeId, austriaMode ? 'austria' : null).then(async (plans) => {
       setSuggestedPlans(plans)
       await loadCoursesForPlans(plans)
       setPlansLoading(false)
@@ -262,7 +285,6 @@ export default function Planner() {
       c.title?.toLowerCase().includes(sidebarSearch.toLowerCase())
     )
 
-  // Always built from suggestedPlans so slots are available even if removed from grid
   const allCoreSlotLabels = (() => {
     const seen = new Set()
     const slots = []
@@ -282,41 +304,20 @@ export default function Planner() {
         })
     })
     return slots.filter((slot) =>
-      !sidebarSearch ||
-      slot.label.toLowerCase().includes(sidebarSearch.toLowerCase())
+      !sidebarSearch || slot.label.toLowerCase().includes(sidebarSearch.toLowerCase())
     )
   })()
 
   function renderToggles() {
     return (
       <div className="flex items-center gap-3 mb-5 flex-wrap">
-        <button
-          onClick={() => setHonorsMode(false)}
-          className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${!honorsMode ? 'bg-fus-green-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-        >
-          Standard
-        </button>
-        <button
-          onClick={() => setHonorsMode(true)}
-          className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${honorsMode ? 'bg-fus-gold-400 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-        >
-          🎓 Honors
-        </button>
+        <button onClick={() => setHonorsMode(false)} className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${!honorsMode ? 'bg-fus-green-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>Standard</button>
+        <button onClick={() => setHonorsMode(true)} className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${honorsMode ? 'bg-fus-gold-400 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>🎓 Honors</button>
         {hasAustria && (
           <>
             <div className="w-px h-5 bg-gray-300" />
-            <button
-              onClick={() => setAustriaMode(false)}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${!austriaMode ? 'bg-fus-green-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-            >
-              Standard Plan
-            </button>
-            <button
-              onClick={() => setAustriaMode(true)}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${austriaMode ? 'bg-fus-green-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-            >
-              ✈️ Austria Plan
-            </button>
+            <button onClick={() => setAustriaMode(false)} className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${!austriaMode ? 'bg-fus-green-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>Standard Plan</button>
+            <button onClick={() => setAustriaMode(true)} className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${austriaMode ? 'bg-fus-green-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>✈️ Austria Plan</button>
           </>
         )}
         {honorsMode && (
@@ -334,29 +335,15 @@ export default function Planner() {
     <div>
       <div className="flex items-center gap-4 mb-4 flex-wrap">
         <h1 className="text-2xl font-bold text-fus-green-700">4-Year Planner</h1>
-        <select
-          value={selectedDegreeId ?? ''}
-          onChange={(e) => setSelectedDegreeId(e.target.value)}
-          className="ml-auto border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-fus-gold-400"
-        >
+        <select value={selectedDegreeId ?? ''} onChange={(e) => setSelectedDegreeId(e.target.value)} className="ml-auto border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-fus-gold-400">
           {degrees.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
         </select>
       </div>
 
       <div className="flex items-center gap-2 mb-4 flex-wrap">
-        <button
-          onClick={() => setViewMode('suggested')}
-          className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${viewMode === 'suggested' ? 'bg-fus-green-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-        >
-          Suggested Plan
-        </button>
+        <button onClick={() => setViewMode('suggested')} className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${viewMode === 'suggested' ? 'bg-fus-green-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>Suggested Plan</button>
         {user ? (
-          <button
-            onClick={() => setViewMode('my-plan')}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${viewMode === 'my-plan' ? 'bg-fus-green-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-          >
-            My Plan
-          </button>
+          <button onClick={() => setViewMode('my-plan')} className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${viewMode === 'my-plan' ? 'bg-fus-green-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>My Plan</button>
         ) : (
           <span className="text-xs text-gray-400 italic">Sign in to build your personal plan</span>
         )}
@@ -379,31 +366,22 @@ export default function Planner() {
         <div className="flex items-center gap-3 mb-5 flex-wrap">
           <div className="flex items-center gap-2">
             <label className="text-sm text-gray-600">Starting semester:</label>
-            <select
-              value={startingSemester}
-              onChange={(e) => setStartingSemester(Number(e.target.value))}
-              className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-fus-gold-400"
-            >
-              {SEMESTER_LABELS.map((label, i) => (
-                <option key={i} value={i}>{label}</option>
-              ))}
+            <select value={startingSemester} onChange={(e) => setStartingSemester(Number(e.target.value))} className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-fus-gold-400">
+              {SEMESTER_LABELS.map((label, i) => <option key={i} value={i}>{label}</option>)}
             </select>
           </div>
           <div className="ml-auto flex items-center gap-2">
             {saveStatus === 'saving' && <span className="text-xs text-gray-400">Saving...</span>}
             {saveStatus === 'saved' && <span className="text-xs text-fus-green-600">✓ Saved</span>}
-            {saveStatus === 'error' && <span className="text-xs text-red-500">Save failed</span>}
+            {saveStatus === 'error' && <span className="text-xs text-red-500">Save failed — try again</span>}
             <button
-              onClick={() => persistSave(semesters)}
+              onClick={saveNow}
               disabled={saveStatus === 'saving'}
               className="text-xs bg-fus-green-600 text-white border border-fus-green-600 rounded-lg px-3 py-1.5 hover:bg-fus-green-700 transition-colors disabled:opacity-50"
             >
-              Save plan
+              {saveStatus === 'saving' ? 'Saving...' : 'Save plan'}
             </button>
-            <button
-              onClick={() => setShowResetConfirm(true)}
-              className="text-xs text-gray-500 border border-gray-300 rounded-lg px-3 py-1.5 hover:bg-gray-50 transition-colors"
-            >
+            <button onClick={() => setShowResetConfirm(true)} className="text-xs text-gray-500 border border-gray-300 rounded-lg px-3 py-1.5 hover:bg-gray-50 transition-colors">
               Reset to suggested
             </button>
           </div>
@@ -413,19 +391,17 @@ export default function Planner() {
       <p className="text-sm text-gray-500 mb-6">
         {viewMode === 'suggested'
           ? <><strong>{selectedDegree?.name}</strong> recommended sequence. Your actual schedule may vary.</>
-          : <>Build your personal plan. Drag courses and core slots between semesters.</>
+          : <>Build your personal plan. Drag courses and core slots between semesters. Use ✕ to remove, or assign a course to any core slot.</>
         }
         {austriaMode && ' This plan accounts for a semester abroad in Gaming, Austria.'}
       </p>
 
       {plansLoading && <div className="text-gray-400 text-sm py-8 text-center">Loading plan...</div>}
 
-      {/* Suggested Plan View */}
+      {/* ── Suggested Plan ── */}
       {!plansLoading && viewMode === 'suggested' && (
         <>
-          {suggestedPlans.length === 0 && (
-            <div className="text-gray-400 text-sm py-8 text-center">No semester plan available for this degree yet.</div>
-          )}
+          {suggestedPlans.length === 0 && <div className="text-gray-400 text-sm py-8 text-center">No semester plan available for this degree yet.</div>}
           {byYear.map(({ year, semesters: yearSems }) =>
             yearSems.length === 0 ? null : (
               <div key={year} className="mb-10">
@@ -434,23 +410,16 @@ export default function Planner() {
                   {yearSems.map((plan) => {
                     const semIndex = getSemesterIndex(plan)
                     const entries = honorsMode ? applyHonors(plan, semIndex) : plan.entries
-                    const semesterCredits = entries.reduce((sum, e) =>
-                      e.course_id ? sum + (courses[e.course_id]?.credits ?? 4) : sum + (e.core_slot_credits ?? 3), 0)
+                    const semesterCredits = entries.reduce((sum, e) => e.course_id ? sum + (courses[e.course_id]?.credits ?? 4) : sum + (e.core_slot_credits ?? 3), 0)
                     const overloaded = semesterCredits > (honorsMode ? 19 : 18)
                     return (
                       <div key={plan.id}>
                         <div className="flex items-baseline justify-between mb-3">
-                          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
-                            {plan.label ?? termLabel(plan.semester)}
-                          </h3>
-                          <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${overloaded ? 'text-red-600 bg-red-50 border border-red-200' : 'text-gray-400'}`}>
-                            {semesterCredits} cr {overloaded ? '⚠ overloaded' : ''}
-                          </span>
+                          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">{plan.label ?? termLabel(plan.semester)}</h3>
+                          <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${overloaded ? 'text-red-600 bg-red-50 border border-red-200' : 'text-gray-400'}`}>{semesterCredits} cr {overloaded ? '⚠ overloaded' : ''}</span>
                         </div>
                         {plan.austria_semester && (
-                          <div className="mb-3 p-2.5 rounded-lg bg-fus-green-50 border border-fus-green-200 text-xs text-fus-green-700">
-                            🌍 {plan.austria_note}
-                          </div>
+                          <div className="mb-3 p-2.5 rounded-lg bg-fus-green-50 border border-fus-green-200 text-xs text-fus-green-700">🌍 {plan.austria_note}</div>
                         )}
                         <div className="flex flex-col gap-2">
                           {entries.map((entry, i) => {
@@ -459,16 +428,8 @@ export default function Planner() {
                               if (!course) return <div key={i} className="text-xs text-gray-400 font-mono px-2">{entry.course_id}</div>
                               return (
                                 <div key={i} className="relative">
-                                  {entry._isHonors && (
-                                    <span className="absolute -top-2 -right-2 z-10 text-xs bg-fus-gold-400 text-white rounded-full px-2 py-0.5">Honors</span>
-                                  )}
-                                  <CourseCard
-                                    course={course}
-                                    allCourses={Object.values(courses)}
-                                    completed={completedSet.has(course.id)}
-                                    prereqsMet={true}
-                                    showToggle={false}
-                                  />
+                                  {entry._isHonors && <span className="absolute -top-2 -right-2 z-10 text-xs bg-fus-gold-400 text-white rounded-full px-2 py-0.5">Honors</span>}
+                                  <CourseCard course={course} allCourses={Object.values(courses)} completed={completedSet.has(course.id)} prereqsMet={true} showToggle={false} />
                                 </div>
                               )
                             }
@@ -490,37 +451,21 @@ export default function Planner() {
         </>
       )}
 
-      {/* My Plan View */}
+      {/* ── My Plan ── */}
       {!plansLoading && viewMode === 'my-plan' && initialized && (
         <DndContext collisionDetection={pointerWithin} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
           <div className="flex gap-6">
-
             {/* Sidebar */}
             <div className="w-56 flex-shrink-0">
               <div className="sticky top-4">
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Course Pool</p>
-                <input
-                  type="text"
-                  placeholder="Search courses..."
-                  value={sidebarSearch}
-                  onChange={(e) => setSidebarSearch(e.target.value)}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs mb-3 focus:outline-none focus:ring-2 focus:ring-fus-gold-400"
-                />
+                <input type="text" placeholder="Search courses..." value={sidebarSearch} onChange={(e) => setSidebarSearch(e.target.value)} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs mb-3 focus:outline-none focus:ring-2 focus:ring-fus-gold-400" />
                 <div className="flex flex-col gap-1.5 max-h-[70vh] overflow-y-auto pr-1">
-
                   {sidebarCourses.map((course) => {
                     const isPlaced = placedCourseIds.has(course.id)
                     const isDone = completedSet.has(course.id) || priorSet.has(course.id)
                     return (
-                      <div
-                        key={course.id}
-                        className={`rounded-lg border px-2.5 py-2 transition-colors ${isDone
-                          ? 'border-fus-green-200 bg-fus-green-50 opacity-50'
-                          : isPlaced
-                            ? 'border-gray-200 bg-gray-50 opacity-60'
-                            : 'border-gray-200 bg-white'
-                          }`}
-                      >
+                      <div key={course.id} className={`rounded-lg border px-2.5 py-2 transition-colors ${isDone ? 'border-fus-green-200 bg-fus-green-50 opacity-50' : isPlaced ? 'border-gray-200 bg-gray-50 opacity-60' : 'border-gray-200 bg-white'}`}>
                         <div className="flex items-center justify-between gap-1">
                           <span className="font-mono text-xs font-bold text-fus-green-600">{course.code}</span>
                           <span className="text-xs text-gray-400">{course.credits} cr</span>
@@ -529,48 +474,27 @@ export default function Planner() {
                         {!isDone && !isPlaced && (
                           <div className="flex flex-wrap gap-1 mt-1.5">
                             {semesters.map((sem, i) => (
-                              <button
-                                key={i}
-                                onClick={() => addCourse(course.id, i)}
-                                className="text-xs text-fus-green-600 bg-fus-green-50 border border-fus-green-200 rounded px-1.5 py-0.5 hover:bg-fus-green-100 transition-colors"
-                                title={`Add to ${sem.label}`}
-                              >
+                              <button key={i} onClick={() => addCourse(course.id, i)} className="text-xs text-fus-green-600 bg-fus-green-50 border border-fus-green-200 rounded px-1.5 py-0.5 hover:bg-fus-green-100 transition-colors" title={`Add to ${sem.label}`}>
                                 Y{sem.year}{sem.term === 'fall' ? 'F' : 'S'}
                               </button>
                             ))}
                           </div>
                         )}
-                        {isPlaced && !isDone && (
-                          <p className="text-xs text-gray-400 mt-1 italic">Already placed</p>
-                        )}
+                        {isPlaced && !isDone && <p className="text-xs text-gray-400 mt-1 italic">Already placed</p>}
                       </div>
                     )
                   })}
 
                   {allCoreSlotLabels.length > 0 && (
                     <>
-                      <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide mt-3 mb-1 px-1">
-                        Core Slots
-                      </div>
+                      <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide mt-3 mb-1 px-1">Core Slots</div>
                       {allCoreSlotLabels.map((slot, i) => (
-                        <div
-                          key={i}
-                          className="rounded-lg border border-dashed border-gray-300 bg-gray-50 px-2.5 py-2"
-                        >
+                        <div key={i} className="rounded-lg border border-dashed border-gray-300 bg-gray-50 px-2.5 py-2">
                           <p className="text-xs text-gray-500 italic">{slot.label}</p>
                           <p className="text-xs text-gray-400 mt-0.5">{slot.credits} cr</p>
                           <div className="flex flex-wrap gap-1 mt-1.5">
                             {semesters.map((sem, si) => (
-                              <button
-                                key={si}
-                                onClick={() => addCoreSlot({
-                                  label: slot.label,
-                                  credits: slot.credits,
-                                  assignedCourseId: null,
-                                }, si)}
-                                className="text-xs text-gray-500 bg-gray-100 border border-gray-200 rounded px-1.5 py-0.5 hover:bg-gray-200 transition-colors"
-                                title={`Add to ${sem.label}`}
-                              >
+                              <button key={si} onClick={() => addCoreSlot({ label: slot.label, credits: slot.credits, assignedCourseId: null }, si)} className="text-xs text-gray-500 bg-gray-100 border border-gray-200 rounded px-1.5 py-0.5 hover:bg-gray-200 transition-colors" title={`Add to ${sem.label}`}>
                                 Y{sem.year}{sem.term === 'fall' ? 'F' : 'S'}
                               </button>
                             ))}
@@ -579,7 +503,6 @@ export default function Planner() {
                       ))}
                     </>
                   )}
-
                 </div>
               </div>
             </div>
@@ -611,14 +534,10 @@ export default function Planner() {
 
           <DragOverlay>
             {activeDragId && activeDragType === 'course' && courses[activeDragId] && (
-              <div className="rounded-lg border border-fus-green-300 bg-white shadow-lg px-3 py-2 text-xs font-bold text-fus-green-700">
-                {courses[activeDragId].code}
-              </div>
+              <div className="rounded-lg border border-fus-green-300 bg-white shadow-lg px-3 py-2 text-xs font-bold text-fus-green-700">{courses[activeDragId].code}</div>
             )}
             {activeDragId && activeDragType === 'coreSlot' && (
-              <div className="rounded-lg border border-dashed border-fus-gold-400 bg-fus-gold-50 shadow-lg px-3 py-2 text-xs text-fus-gold-700 italic">
-                Core slot
-              </div>
+              <div className="rounded-lg border border-dashed border-fus-gold-400 bg-fus-gold-50 shadow-lg px-3 py-2 text-xs text-fus-gold-700 italic">Core slot</div>
             )}
           </DragOverlay>
         </DndContext>
@@ -630,9 +549,7 @@ export default function Planner() {
           semesterLabel={semesters[priorModalSemester]?.label ?? SEMESTER_LABELS[priorModalSemester]}
           semesterIndex={priorModalSemester}
           allCourses={Object.values(courses)}
-          existingPrior={priorCourses.filter((p) =>
-            p.semester_label === (semesters[priorModalSemester]?.label ?? SEMESTER_LABELS[priorModalSemester])
-          )}
+          existingPrior={priorCourses.filter((p) => p.semester_label === (semesters[priorModalSemester]?.label ?? SEMESTER_LABELS[priorModalSemester]))}
           onClose={() => setPriorModalSemester(null)}
           onSaved={(ids) => {
             setPriorCourses((prev) => [
@@ -647,19 +564,10 @@ export default function Planner() {
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full">
             <h3 className="font-bold text-gray-900 mb-2">Reset to suggested plan?</h3>
-            <p className="text-sm text-gray-500 mb-6">
-              This will replace your current personal plan with the recommended sequence. Your completed courses won't be affected.
-            </p>
+            <p className="text-sm text-gray-500 mb-6">This will replace your current personal plan with the recommended sequence. Your completed courses won't be affected.</p>
             <div className="flex gap-3 justify-end">
-              <button onClick={() => setShowResetConfirm(false)} className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700">
-                Cancel
-              </button>
-              <button
-                onClick={() => { resetToSuggested(); setShowResetConfirm(false) }}
-                className="px-4 py-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600"
-              >
-                Reset
-              </button>
+              <button onClick={() => setShowResetConfirm(false)} className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700">Cancel</button>
+              <button onClick={() => { resetToSuggested(); setShowResetConfirm(false) }} className="px-4 py-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600">Reset</button>
             </div>
           </div>
         </div>

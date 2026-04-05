@@ -9,6 +9,12 @@ export function usePlannedCourses(userId, degreeId, suggestedPlans, courses) {
     const [initialized, setInitialized] = useState(false)
     const saveTimer = useRef(null)
 
+    // Always holds the latest semesters so saveNow can read it without stale closure
+    const semestersRef = useRef([])
+    useEffect(() => {
+        semestersRef.current = semesters
+    }, [semesters])
+
     function buildFromSuggested(plans, savedCourseMap = null, savedCoreSlotMap = null) {
         return plans.map((plan, i) => {
             const term = plan.semester === 1 ? 'fall' : 'spring'
@@ -82,17 +88,19 @@ export function usePlannedCourses(userId, degreeId, suggestedPlans, courses) {
     function resetToSuggested(plans = suggestedPlans, doSave = true) {
         const built = buildFromSuggested(plans)
         setSemesters(built)
-        if (doSave) scheduleSave(built)
+        semestersRef.current = built
+        if (doSave) scheduleAutosave(built)
     }
 
-    function scheduleSave(data) {
+    function scheduleAutosave(data) {
         setSaveStatus('saving')
         if (saveTimer.current) clearTimeout(saveTimer.current)
-        saveTimer.current = setTimeout(() => persistSave(data), AUTOSAVE_DELAY)
+        saveTimer.current = setTimeout(() => persistSaveData(data), AUTOSAVE_DELAY)
     }
 
-    async function persistSave(data) {
-        if (!userId || !degreeId) return
+    // Core persist function — always takes explicit data so it never reads stale state
+    async function persistSaveData(data) {
+        if (!userId || !degreeId) return false
         setSaveStatus('saving')
 
         await supabase
@@ -131,15 +139,24 @@ export function usePlannedCourses(userId, degreeId, suggestedPlans, courses) {
             })
         })
 
-        if (rows.length) {
-            const { error } = await supabase.from('planned_courses').insert(rows)
-            setSaveStatus(error ? 'error' : 'saved')
-        } else {
-            setSaveStatus('saved')
-        }
+        const success = rows.length
+            ? !(await supabase.from('planned_courses').insert(rows)).error
+            : true
 
+        setSaveStatus(success ? 'saved' : 'error')
         setTimeout(() => setSaveStatus('idle'), 2000)
+        return success
     }
+
+    // Stable save function — always reads from ref so it's never stale
+    // This is what the Save button calls directly
+    const saveNow = useCallback(async () => {
+        if (saveTimer.current) {
+            clearTimeout(saveTimer.current)
+            saveTimer.current = null
+        }
+        return persistSaveData(semestersRef.current)
+    }, [userId, degreeId])
 
     const moveCourse = useCallback((courseId, toSemesterIndex) => {
         setSemesters((prev) => {
@@ -151,7 +168,7 @@ export function usePlannedCourses(userId, degreeId, suggestedPlans, courses) {
                 ...next[toSemesterIndex],
                 courseIds: [...next[toSemesterIndex].courseIds, courseId],
             }
-            scheduleSave(next)
+            scheduleAutosave(next)
             return next
         })
     }, [])
@@ -166,7 +183,7 @@ export function usePlannedCourses(userId, degreeId, suggestedPlans, courses) {
                 if (i === toSemesterIndex) return { ...s, coreSlots: [...s.coreSlots, slot] }
                 return s
             })
-            scheduleSave(next)
+            scheduleAutosave(next)
             return next
         })
     }, [])
@@ -177,7 +194,7 @@ export function usePlannedCourses(userId, degreeId, suggestedPlans, courses) {
                 ...s,
                 coreSlots: s.coreSlots.filter((cs) => cs.id !== slotId),
             }))
-            scheduleSave(next)
+            scheduleAutosave(next)
             return next
         })
     }, [])
@@ -190,7 +207,25 @@ export function usePlannedCourses(userId, degreeId, suggestedPlans, courses) {
                     cs.id === slotId ? { ...cs, assignedCourseId: courseId } : cs
                 ),
             }))
-            scheduleSave(next)
+            scheduleAutosave(next)
+            return next
+        })
+    }, [])
+
+    const addCoreSlot = useCallback((slot, semesterIndex) => {
+        const newSlot = {
+            id: `coreSlot-added-${Date.now()}`,
+            label: slot.label,
+            credits: slot.credits ?? 3,
+            assignedCourseId: slot.assignedCourseId ?? null,
+        }
+        setSemesters((prev) => {
+            const next = prev.map((s, i) =>
+                i === semesterIndex
+                    ? { ...s, coreSlots: [...s.coreSlots, newSlot] }
+                    : s
+            )
+            scheduleAutosave(next)
             return next
         })
     }, [])
@@ -201,7 +236,7 @@ export function usePlannedCourses(userId, degreeId, suggestedPlans, courses) {
                 ...s,
                 courseIds: s.courseIds.filter((id) => id !== courseId),
             }))
-            scheduleSave(next)
+            scheduleAutosave(next)
             return next
         })
     }, [])
@@ -216,25 +251,7 @@ export function usePlannedCourses(userId, degreeId, suggestedPlans, courses) {
                 ...next[semesterIndex],
                 courseIds: [...next[semesterIndex].courseIds, courseId],
             }
-            scheduleSave(next)
-            return next
-        })
-    }, [])
-
-    // Add a core slot placeholder to a specific semester
-    const addCoreSlot = useCallback((slotTemplate, semesterIndex) => {
-        setSemesters((prev) => {
-            const newSlot = {
-                ...slotTemplate,
-                id: `${slotTemplate.label}-${Date.now()}`,
-                assignedCourseId: null,
-            }
-            const next = prev.map((s, i) =>
-                i === semesterIndex
-                    ? { ...s, coreSlots: [...s.coreSlots, newSlot] }
-                    : s
-            )
-            scheduleSave(next)
+            scheduleAutosave(next)
             return next
         })
     }, [])
@@ -247,9 +264,10 @@ export function usePlannedCourses(userId, degreeId, suggestedPlans, courses) {
         moveCoreSlot,
         removeCoreSlot,
         assignCoreSlot,
+        addCoreSlot,
         removeCourse,
         addCourse,
-        addCoreSlot,
         resetToSuggested,
+        saveNow,
     }
 }
