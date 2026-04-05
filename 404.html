@@ -1,39 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>FUS CS/SE Planner</title>
-    <script>
-      // GitHub Pages serves this 404.html when a user refreshes on any
-      // route other than /. This script encodes the current path into
-      // the query string and redirects to the root, where the React app
-      // picks it up and restores the correct route.
-      //
-      // This is a well-known workaround for SPAs on GitHub Pages.
-      // See: https://github.com/rafgraph/spa-github-pages
 
-      var segmentCount = 1; // must match the number of path segments in your repo name
-      var l = window.location;
-      l.replace(
-        l.protocol +
-          '//' +
-          l.hostname +
-          (l.port ? ':' + l.port : '') +
-          l.pathname
-            .split('/')
-            .slice(0, 1 + segmentCount)
-            .join('/') +
-          '/?p=/' +
-          l.pathname
-            .slice(1)
-            .split('/')
-            .slice(segmentCount)
-            .join('/')
-            .replace(/&/g, '~and~') +
-          (l.search ? '&q=' + l.search.slice(1).replace(/&/g, '~and~') : '') +
-          l.hash
-      );
-    </script>
-  </head>
-  <body></body>
+<head>
+  <meta charset="UTF-8" />
+  <title>FUS CS/SE Planner</title>
+  <script>
+    var segmentCount = 1;
+    var l = window.location;
+    l.replace(
+      l.protocol +
+      '//' +
+      l.hostname +
+      (l.port ? ':' + l.port : '') +
+      l.pathname
+        .split('/')
+        .slice(0, 1 + segmentCount)
+        .join('/') +
+      '/?p=/' +
+      l.pathname
+        .slice(1)
+        .split('/')
+        .slice(segmentCount)
+        .join('/')
+        .replace(/&/g, '~and~') +
+      (l.search ? '&q=' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+      l.hash
+    );
+  </script>
+</head>
+
+<body></body>
+
 </html>
