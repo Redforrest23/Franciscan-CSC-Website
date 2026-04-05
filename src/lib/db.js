@@ -294,7 +294,51 @@ export async function toggleIgnoredWarning(userId, courseId, warningType, curren
     }
 }
 
-// ── Minors ────────────────────────────────────────────────
+// ── Minors catalog ────────────────────────────────────────
+
+export async function fetchMinors() {
+    const { data, error } = await supabase
+        .from('minors')
+        .select('*')
+        .order('name', { ascending: true })
+
+    if (error) {
+        console.error('fetchMinors error:', error.message)
+        return []
+    }
+    return data ?? []
+}
+
+export async function fetchMinorRequirements(minorId) {
+    const { data: groups, error } = await supabase
+        .from('minor_requirement_groups')
+        .select(`
+      id,
+      label,
+      type,
+      elective,
+      elective_count,
+      notes,
+      position,
+      minor_requirement_courses (
+        course_id
+      )
+    `)
+        .eq('minor_id', minorId)
+        .order('position', { ascending: true })
+
+    if (error) {
+        console.error('fetchMinorRequirements error:', error.message)
+        return []
+    }
+
+    return (groups ?? []).map((g) => ({
+        ...g,
+        courses: (g.minor_requirement_courses ?? []).map((r) => r.course_id),
+    }))
+}
+
+// ── Selected minors ───────────────────────────────────────
 
 export async function fetchSelectedMinors(userId) {
     const { data, error } = await supabase
