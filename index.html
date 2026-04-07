@@ -8,10 +8,14 @@
     <title>FUS CS/SE Planner</title>
     <script>
         (function () {
-            var redirect = sessionStorage.redirect;
-            delete sessionStorage.redirect;
-            if (redirect && redirect !== location.href) {
-                history.replaceState(null, null, redirect);
+            var p = new URLSearchParams(window.location.search).get('p');
+            if (p) {
+                window.history.replaceState(
+                    null, null,
+                    '/Franciscan-CSC-Website/' + p +
+                    (new URLSearchParams(window.location.search).get('q') ? '?' + new URLSearchParams(window.location.search).get('q') : '') +
+                    window.location.hash
+                );
             }
         })();
     </script>
