@@ -135,7 +135,6 @@ ${v}`}class xe extends Error{constructor({message:t,code:r,cause:n,name:s}){var 
       id,
       label,
       elective,
-      elective_count,
       notes,
       position,
       minor_requirement_courses (
