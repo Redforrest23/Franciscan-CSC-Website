@@ -12,6 +12,9 @@ import {
   toggleIgnoredWarning,
   courseMap,
   hasAustriaPlan,
+  fetchSelectedMinors,
+  fetchMinors,
+  fetchMinorRequirements,
 } from '../lib/db'
 import { DndContext, DragOverlay, pointerWithin } from '@dnd-kit/core'
 import CourseCard from '../components/CourseCard'
@@ -74,6 +77,9 @@ export default function Planner() {
   const [priorModalSemester, setPriorModalSemester] = useState(null)
   const [showResetConfirm, setShowResetConfirm] = useState(false)
 
+  // Minor course pool: [{minorName, courseIds}]
+  const [minorCoursePool, setMinorCoursePool] = useState([])
+
   const {
     semesters,
     saveStatus,
@@ -128,12 +134,38 @@ export default function Planner() {
       setIgnoredWarnings(new Set(rows.map((r) => `${r.course_id}:${r.warning_type}`)))
     })
 
-    // Load saved planner preferences and restore them
     fetchPlannerPreferences(user.id).then((prefs) => {
       if (prefs.austriaMode !== undefined) setAustriaMode(prefs.austriaMode)
       if (prefs.honorsMode !== undefined) setHonorsMode(prefs.honorsMode)
       if (prefs.startingSemester !== undefined) setStartingSemester(prefs.startingSemester)
       setPrefsLoaded(true)
+    })
+  }, [user])
+
+  // Load saved minors for the course pool
+  useEffect(() => {
+    if (!user) { setMinorCoursePool([]); return }
+    fetchSelectedMinors(user.id).then(async (minorIds) => {
+      if (!minorIds.length) { setMinorCoursePool([]); return }
+      const [minorsList, ...groupsArr] = await Promise.all([
+        fetchMinors(),
+        ...minorIds.map((id) => fetchMinorRequirements(id)),
+      ])
+      const pools = minorIds.map((minorId, i) => {
+        const minor = minorsList.find((m) => m.id === minorId)
+        const groups = groupsArr[i] ?? []
+        const courseIds = [...new Set(groups.flatMap((g) => g.courses ?? []))]
+        return { minorName: minor?.name ?? minorId, courseIds }
+      })
+      setMinorCoursePool(pools)
+
+      // Load those courses into the courses map
+      const allIds = [...new Set(pools.flatMap((p) => p.courseIds))]
+      if (allIds.length) {
+        fetchCourses(allIds).then((list) =>
+          setCourses((prev) => ({ ...prev, ...courseMap(list) }))
+        )
+      }
     })
   }, [user])
 
@@ -455,12 +487,23 @@ export default function Planner() {
       {!plansLoading && viewMode === 'my-plan' && initialized && (
         <DndContext collisionDetection={pointerWithin} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
           <div className="flex gap-6">
+
             {/* Sidebar */}
             <div className="w-56 flex-shrink-0">
               <div className="sticky top-4">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Course Pool</p>
-                <input type="text" placeholder="Search courses..." value={sidebarSearch} onChange={(e) => setSidebarSearch(e.target.value)} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs mb-3 focus:outline-none focus:ring-2 focus:ring-fus-gold-400" />
+                <input
+                  type="text"
+                  placeholder="Search courses..."
+                  value={sidebarSearch}
+                  onChange={(e) => setSidebarSearch(e.target.value)}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs mb-3 focus:outline-none focus:ring-2 focus:ring-fus-gold-400"
+                />
                 <div className="flex flex-col gap-1.5 max-h-[70vh] overflow-y-auto pr-1">
+
+                  {/* ── Major ── */}
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                    Major
+                  </p>
                   {sidebarCourses.map((course) => {
                     const isPlaced = placedCourseIds.has(course.id)
                     const isDone = completedSet.has(course.id) || priorSet.has(course.id)
@@ -474,7 +517,9 @@ export default function Planner() {
                         {!isDone && !isPlaced && (
                           <div className="flex flex-wrap gap-1 mt-1.5">
                             {semesters.map((sem, i) => (
-                              <button key={i} onClick={() => addCourse(course.id, i)} className="text-xs text-fus-green-600 bg-fus-green-50 border border-fus-green-200 rounded px-1.5 py-0.5 hover:bg-fus-green-100 transition-colors" title={`Add to ${sem.label}`}>
+                              <button key={i} onClick={() => addCourse(course.id, i)}
+                                className="text-xs text-fus-green-600 bg-fus-green-50 border border-fus-green-200 rounded px-1.5 py-0.5 hover:bg-fus-green-100 transition-colors"
+                                title={`Add to ${sem.label}`}>
                                 Y{sem.year}{sem.term === 'fall' ? 'F' : 'S'}
                               </button>
                             ))}
@@ -485,6 +530,7 @@ export default function Planner() {
                     )
                   })}
 
+                  {/* ── Core Slots ── */}
                   {allCoreSlotLabels.length > 0 && (
                     <>
                       <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide mt-3 mb-1 px-1">Core Slots</div>
@@ -494,7 +540,9 @@ export default function Planner() {
                           <p className="text-xs text-gray-400 mt-0.5">{slot.credits} cr</p>
                           <div className="flex flex-wrap gap-1 mt-1.5">
                             {semesters.map((sem, si) => (
-                              <button key={si} onClick={() => addCoreSlot({ label: slot.label, credits: slot.credits, assignedCourseId: null }, si)} className="text-xs text-gray-500 bg-gray-100 border border-gray-200 rounded px-1.5 py-0.5 hover:bg-gray-200 transition-colors" title={`Add to ${sem.label}`}>
+                              <button key={si} onClick={() => addCoreSlot({ label: slot.label, credits: slot.credits, assignedCourseId: null }, si)}
+                                className="text-xs text-gray-500 bg-gray-100 border border-gray-200 rounded px-1.5 py-0.5 hover:bg-gray-200 transition-colors"
+                                title={`Add to ${sem.label}`}>
                                 Y{sem.year}{sem.term === 'fall' ? 'F' : 'S'}
                               </button>
                             ))}
@@ -503,6 +551,59 @@ export default function Planner() {
                       ))}
                     </>
                   )}
+
+                  {/* ── Minors ── */}
+                  {minorCoursePool.map(({ minorName, courseIds }) => {
+                    const filtered = courseIds
+                      .map((id) => courses[id])
+                      .filter(Boolean)
+                      .filter((c) =>
+                        !sidebarSearch ||
+                        c.code?.toLowerCase().includes(sidebarSearch.toLowerCase()) ||
+                        c.title?.toLowerCase().includes(sidebarSearch.toLowerCase())
+                      )
+                    if (!filtered.length) return null
+                    return (
+                      <div key={minorName}>
+                        <div className="text-xs font-semibold text-fus-gold-700 uppercase tracking-wide mt-4 mb-1 px-1 border-t border-fus-gold-100 pt-3">
+                          Minor: {minorName}
+                        </div>
+                        {filtered.map((course) => {
+                          const isPlaced = placedCourseIds.has(course.id)
+                          const isDone = completedSet.has(course.id) || priorSet.has(course.id)
+                          return (
+                            <div key={course.id} className={`rounded-lg border px-2.5 py-2 transition-colors mb-1.5 ${isDone ? 'border-fus-gold-200 bg-fus-gold-50 opacity-50' : isPlaced ? 'border-gray-200 bg-gray-50 opacity-60' : 'border-fus-gold-200 bg-fus-gold-50'}`}>
+                              <div className="flex items-center justify-between gap-1">
+                                <span className="font-mono text-xs font-bold text-fus-gold-700">{course.code}</span>
+                                <span className="text-xs text-gray-400">{course.credits} cr</span>
+                              </div>
+                              <p className="text-xs text-gray-500 mt-0.5 leading-snug truncate">{course.title}</p>
+                              {!isDone && !isPlaced && (
+                                <div className="flex flex-wrap gap-1 mt-1.5">
+                                  {semesters.map((sem, i) => (
+                                    <button key={i} onClick={() => addCourse(course.id, i)}
+                                      className="text-xs text-fus-gold-700 bg-fus-gold-100 border border-fus-gold-200 rounded px-1.5 py-0.5 hover:bg-fus-gold-200 transition-colors"
+                                      title={`Add to ${sem.label}`}>
+                                      Y{sem.year}{sem.term === 'fall' ? 'F' : 'S'}
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
+                              {isPlaced && !isDone && <p className="text-xs text-gray-400 mt-1 italic">Already placed</p>}
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )
+                  })}
+
+                  {/* No minors message */}
+                  {user && minorCoursePool.length === 0 && (
+                    <p className="text-xs text-gray-400 italic mt-4 px-1">
+                      Add minors on the Minors page to see their courses here.
+                    </p>
+                  )}
+
                 </div>
               </div>
             </div>
