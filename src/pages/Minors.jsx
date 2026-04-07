@@ -25,6 +25,7 @@ export default function Minors() {
   const [degrees, setDegrees] = useState([])
   const [completedSet, setCompletedSet] = useState(new Set())
   const [savedMinors, setSavedMinors] = useState([])
+  const [savedMinorGroups, setSavedMinorGroups] = useState({})
   const [courses, setCourses] = useState({})
   const [loadingMinors, setLoadingMinors] = useState(true)
   const [loadingRequirements, setLoadingRequirements] = useState(false)
@@ -53,7 +54,6 @@ export default function Minors() {
       setRequirementGroups(groups)
       setLoadingRequirements(false)
 
-      // Fetch all courses referenced by this minor
       const allIds = [...new Set(groups.flatMap((g) => g.courses ?? []))]
       if (allIds.length) {
         fetchCourses(allIds).then((list) =>
@@ -74,6 +74,24 @@ export default function Minors() {
     fetchSelectedMinors(user.id).then(setSavedMinors)
   }, [user])
 
+  // Fetch requirement groups for all saved minors (for progress cards)
+  useEffect(() => {
+    if (!savedMinors.length) return
+    savedMinors.forEach((minorId) => {
+      if (savedMinorGroups[minorId]) return
+      fetchMinorRequirements(minorId).then((groups) => {
+        setSavedMinorGroups((prev) => ({ ...prev, [minorId]: groups }))
+
+        const allIds = [...new Set(groups.flatMap((g) => g.courses ?? []))]
+        if (allIds.length) {
+          fetchCourses(allIds).then((list) =>
+            setCourses((prev) => ({ ...prev, ...courseMap(list) }))
+          )
+        }
+      })
+    })
+  }, [savedMinors])
+
   async function handleToggleMinor(minorId) {
     if (!user) return
     const isSelected = savedMinors.includes(minorId)
@@ -85,7 +103,6 @@ export default function Minors() {
     }
   }
 
-  // Overlap detection against selected degree's known course IDs
   const csCoreCourses = new Set([
     'CSC142', 'CSC144', 'CSC145', 'CSC204', 'CSC261', 'CSC265', 'CSC276',
     'CSC310', 'CSC344', 'CSC401', 'CSC438', 'CSC439', 'CSC335',
@@ -146,6 +163,8 @@ export default function Minors() {
                 <MinorProgressCard
                   key={minorId}
                   minor={m}
+                  requirementGroups={savedMinorGroups[minorId] ?? []}
+                  courses={courses}
                   completedSet={completedSet}
                   onRemove={() => handleToggleMinor(minorId)}
                 />
@@ -157,7 +176,6 @@ export default function Minors() {
 
       {minor && (
         <>
-          {/* Minor header card */}
           <div className="mb-6 p-4 rounded-xl bg-white border border-gray-200 shadow-sm">
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -190,7 +208,6 @@ export default function Minors() {
             )}
           </div>
 
-          {/* Requirement groups */}
           {loadingRequirements ? (
             <div className="text-sm text-gray-400 italic py-4">Loading requirements...</div>
           ) : (
