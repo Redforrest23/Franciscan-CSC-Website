@@ -313,15 +313,15 @@ export async function fetchMinorRequirements(minorId) {
     const { data: groups, error } = await supabase
         .from('minor_requirement_groups')
         .select(`
-      id,
-      label,
-      elective,
-      notes,
-      position,
-      minor_requirement_courses (
-        course_id
-      )
-    `)
+  id,
+  label,
+  choose_one,
+  elective,
+  position,
+  minor_requirement_courses (
+    course_id
+  )
+`)
         .eq('minor_id', minorId)
         .order('position', { ascending: true })
 
