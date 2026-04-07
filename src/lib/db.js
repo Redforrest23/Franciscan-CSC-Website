@@ -315,7 +315,6 @@ export async function fetchMinorRequirements(minorId) {
         .select(`
       id,
       label,
-      type,
       elective,
       elective_count,
       notes,
