@@ -32,7 +32,6 @@ export default function Minors() {
 
   const minor = minorsData.find((m) => m.id === selectedMinorId) ?? null
 
-  // Load all minors from Supabase
   useEffect(() => {
     fetchMinors().then((data) => {
       setMinorsData(data)
@@ -41,12 +40,10 @@ export default function Minors() {
     })
   }, [])
 
-  // Load degrees for the overlap selector
   useEffect(() => {
     fetchDegrees().then(setDegrees)
   }, [])
 
-  // Load requirement groups whenever selected minor changes
   useEffect(() => {
     if (!selectedMinorId) return
     setLoadingRequirements(true)
@@ -63,7 +60,6 @@ export default function Minors() {
     })
   }, [selectedMinorId])
 
-  // Load user data
   useEffect(() => {
     if (!user) {
       setCompletedSet(new Set())
@@ -74,7 +70,6 @@ export default function Minors() {
     fetchSelectedMinors(user.id).then(setSavedMinors)
   }, [user])
 
-  // Fetch requirement groups for all saved minors (for progress cards)
   useEffect(() => {
     if (!savedMinors.length) return
     savedMinors.forEach((minorId) => {
@@ -100,6 +95,13 @@ export default function Minors() {
       setSavedMinors((prev) =>
         isSelected ? prev.filter((id) => id !== minorId) : [...prev, minorId]
       )
+      if (isSelected) {
+        setSavedMinorGroups((prev) => {
+          const next = { ...prev }
+          delete next[minorId]
+          return next
+        })
+      }
     }
   }
 
@@ -149,7 +151,6 @@ export default function Minors() {
         </select>
       </div>
 
-      {/* Saved minors summary */}
       {user && savedMinors.length > 0 && (
         <div className="mb-8">
           <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
@@ -181,9 +182,11 @@ export default function Minors() {
               <div>
                 <h2 className="text-lg font-semibold text-fus-green-700">{minor.name}</h2>
                 <p className="text-sm text-gray-500 mt-1">{minor.description}</p>
-                <p className="text-xs text-gray-400 mt-1">
-                  {minor.total_credits} credits required
-                </p>
+                {minor.total_credits && (
+                  <p className="text-xs text-gray-400 mt-1">
+                    {minor.total_credits} credits required
+                  </p>
+                )}
               </div>
               {user && (
                 <button
