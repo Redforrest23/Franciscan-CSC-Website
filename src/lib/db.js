@@ -316,7 +316,6 @@ export async function fetchMinorRequirements(minorId) {
       id,
       label,
       elective,
-      elective_count,
       notes,
       position,
       minor_requirement_courses (
